@@ -1,0 +1,3941 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>KlangKiste - Musik Notations-App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables */
+        :root {
+            --bg-primary: #e8e8ff;
+            --bg-secondary: #f0f0ff;
+            --bg-tertiary: #d8d8ff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --accent: #7c3aed;
+            --accent-secondary: #6366f1;
+            --border: #b8b8e8;
+            --shadow: rgba(0, 0, 0, 0.15);
+            --bariton-color: #dc2626;
+            --sopran-color: #6366f1;
+            --akkord-color: #1d1d1f;
+            --btn-rec: #ef4444;
+            --btn-stop: #6b7280;
+            --btn-play: #10b981;
+            --btn-editor: #8b5cf6;
+            --btn-danger: #ef4444;
+            --hover-insert: #10b981;
+            --hover-delete: #ef4444;
+
+        }
+
+        body.dark-mode {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f1419;
+            --text-primary: #e8e8ed;
+            --text-secondary: #98989d;
+            --border: #2d3748;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --akkord-color: #e8e8ed;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .app-header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .header-content {
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            grid-template-rows: auto auto;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .app-logo {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            font-family: 'Righteous', cursive;
+            font-size: 2.8rem;
+            line-height: 1.2;
+            color: var(--accent);
+            display: flex;
+            flex-direction: column;
+            margin-right: 2.5rem;
+        }
+
+        .app-logo .logo-klang {
+            background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .app-logo .logo-kiste {
+            background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-controls {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: nowrap;
+            padding-left: 2.5rem;
+            padding-right: 1rem;
+        }
+
+        .recording-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .playback-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .metronom-settings {
+            margin: 0;
+        }
+
+        .theme-toggle-wrapper {
+            grid-column: 3;
+            grid-row: 1;
+            align-self: start;
+        }
+
+        .instrument-selector {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
+        .instrument-selector label {
+            display: none;
+        }
+
+        .instrument-dropdown {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .metronom-settings {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-rec {
+            background: var(--btn-rec);
+            color: white;
+        }
+
+        .btn-rec:hover { background: #dc2626; }
+        .btn-rec.active { animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .btn-stop {
+            background: var(--btn-stop);
+            color: white;
+        }
+
+        .btn-stop:hover { background: #4b5563; }
+
+        .btn-play {
+            background: var(--btn-play);
+            color: white;
+        }
+
+        .btn-play:hover { background: #059669; }
+
+        .btn-editor {
+            background: var(--btn-editor);
+            color: white;
+        }
+
+        .btn-editor:hover { background: #7c3aed; }
+        .btn-editor.active { 
+            background: #7c3aed; 
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3); 
+        }       
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-theme {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .editor-panel {
+            display: none;
+            position: fixed;
+            left: 20px;
+            top: 180px;
+            width: 200px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px var(--shadow);
+            z-index: 100;
+        }
+
+        body.editor-mode .editor-panel {
+            display: block;
+        }
+
+        .editor-panel h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .editor-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .editor-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .editor-hint {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .editor-btn {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .editor-btn-insert {
+            background: var(--hover-insert);
+            color: white;
+        }
+
+        .editor-btn-insert:hover {
+            background: #059669;
+        }
+
+        .editor-btn-delete {
+            background: var(--hover-delete);
+            color: white;
+        }
+
+        .editor-btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .editor-btn.active {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        }
+
+        .editor-btn-delete.active {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+        }
+
+        .mobile-editor-buttons {
+            display: none;
+            gap: 0.5rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-editor-buttons {
+                display: flex;
+                flex-wrap: wrap;
+            }
+    
+            .editor-panel {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .mobile-editor-buttons {
+                display: none !important;
+            }
+        }
+
+        .app-main {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .partitur-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .partitur-header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 0;
+        }
+
+        .partitur-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            width: 100%;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .partitur-header-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .partitur-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .btn-small {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-small:hover {
+            background: var(--border);
+        }
+
+        .partitur-content {
+            min-height: 200px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* PARTITUR-TABELLE STYLES */
+        .track {
+            margin-bottom: 2rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .track-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .track-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .track-column-count {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+
+        body.editor-mode .track-column-count {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .track-name.bariton { color: var(--bariton-color); }
+        .track-name.sopran { color: var(--sopran-color); }
+        .track-name.akkord { color: var(--akkord-color); }
+
+        .track-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .track-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+
+        .track-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .track-volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .volume-icon {
+            font-size: 1.2rem;
+        }
+
+        .track-volume-slider {
+            width: 120px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-primary);
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .track-volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .track-volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+        }
+
+        .volume-value {
+            min-width: 45px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .track-delete-btn {
+            display: none;
+            padding: 0.4rem 0.6rem;
+            background: var(--btn-danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .track-delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        body.editor-mode .track-delete-btn {
+            display: block;
+        }
+
+        .track-volume {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        /* Scrollbar Styling */
+        .table-wrapper::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 5px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Firefox Scrollbar */
+        .table-wrapper {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) var(--bg-tertiary);
+        }
+
+        .notation-table {
+            width: auto;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            min-width: 100%;
+        }
+
+        .notation-table th,
+        .notation-table td {
+            padding: 0.57rem 0.71rem;
+            text-align: center;
+            border: 1px solid transparent;
+            min-width: 57px;
+        }
+
+        body.editor-mode .notation-table th,
+        body.editor-mode .notation-table td {
+            border: 1px solid var(--border);
+        }
+
+        body.editor-mode .notation-table td {
+            background: var(--bg-tertiary);
+        }
+
+        .notation-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            font-size: 0.81rem;
+            color: var(--text-secondary);
+        }
+
+        .notation-table td {
+            font-family: 'Courier New', monospace;
+            font-size: 1.045rem;
+            font-weight: 700;
+        }
+
+        .notation-table td.empty {
+            color: var(--text-secondary);
+            opacity: 0.3;
+        }
+
+        .row-label {
+            text-align: left !important;
+            background: var(--bg-tertiary) !important;
+            font-weight: 600;
+            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+        }
+
+        .row-zahlzeit {
+            background: var(--bg-tertiary) !important;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Verstecke Labels standardmäßig */
+        .notation-table th,
+        .row-label {
+            display: none;
+        }
+
+        .zahlzeit-row {
+            display: none;
+        }
+
+        .zahlzeit-row.visible {
+            display: table-row;
+        }
+
+        .beats-row {
+            display: none;
+            background: var(--bg-tertiary);
+            font-size: 0.8rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
+        .beats-row.visible {
+            display: table-row;
+        }
+
+        .row-beats {
+            text-align: center;
+            font-size: 0.8rem;
+            padding: 0.3rem;
+        }
+
+        body.editor-mode .notation-table td[contenteditable="true"] {
+            cursor: text;
+            outline: 2px solid transparent;
+            transition: outline 0.2s ease;
+        }
+
+        body.editor-mode .notation-table td[contenteditable="true"]:focus {
+            outline: 2px solid var(--accent);
+            background: var(--bg-secondary);
+        }
+
+        body.editor-mode .notation-table td[contenteditable="true"]:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* PLAYBACK CURSOR - Aktive Zellen Highlighting */
+        .notation-table td.playing {
+            background: rgba(239, 68, 68, 0.25) !important;
+            box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.5);
+            transition: background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        body.dark-mode .notation-table td.playing {
+            background: rgba(239, 68, 68, 0.3) !important;
+            box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.6);
+        }
+
+        body.column-insert-mode .notation-table td[data-column] {
+            cursor: pointer;
+            position: relative;
+        }
+
+        body.column-insert-mode .notation-table td[data-column]:hover {
+            box-shadow: inset 4px 0 0 0 var(--hover-insert);
+        }
+
+        body.column-delete-mode .notation-table td[data-column] {
+            cursor: pointer;
+        }
+
+        body.column-delete-mode .notation-table td[data-column]:hover {
+            background: rgba(239, 68, 68, 0.2) !important;
+            box-shadow: inset 0 0 0 2px var(--hover-delete);
+        }
+
+        body.column-delete-mode .notation-table td[data-column].marked-for-deletion {
+            background: rgba(239, 68, 68, 0.4) !important;
+            box-shadow: inset 0 0 0 3px var(--hover-delete);
+        }
+
+        .notation-table td[data-column] {
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .body:not(.column-insert-mode):not(.column-delete-mode) .notation-table td.column-hover {
+            background: rgba(59, 130, 246, 0.15) !important;
+        }
+
+        body.dark-mode:not(.column-insert-mode):not(.column-delete-mode) .notation-table td.column-hover {
+            background: rgba(59, 130, 246, 0.2) !important;
+        }
+
+        .notation-table td.preview {
+            background: rgba(59, 130, 246, 0.2) !important;
+            box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.6);
+        }
+
+        body.dark-mode .notation-table td.preview {
+            background: rgba(59, 130, 246, 0.25) !important;
+            box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.7);
+        }
+
+        .keyboard-info {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 6px var(--shadow);
+        }
+
+        .info-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 8px var(--shadow);
+        }
+
+        .status-text {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .current-instrument {
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .current-instrument.bariton {
+            background: var(--bariton-color);
+            color: white;
+        }
+
+        .current-instrument.sopran {
+            background: var(--sopran-color);
+            color: white;
+        }
+
+        .current-instrument.akkord {
+            background: var(--akkord-color);
+            color: white;
+        }
+
+        .metronom-settings {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .metronom-settings label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .metronom-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .metronom-toggle-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--btn-stop);
+            border-radius: 12px;
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .metronom-toggle-label input[type="checkbox"]:checked + .toggle-switch {
+            background: var(--btn-play);
+        }
+
+        .metronom-toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
+            transform: translateX(20px);
+        }
+
+        .metronom-settings input,
+        .metronom-settings select {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .validation-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            border: 2px solid var(--btn-danger);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px var(--shadow);
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .validation-modal.show {
+            display: block;
+        }
+
+        .validation-modal h3 {
+            color: var(--btn-danger);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .validation-modal p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .validation-modal ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .validation-modal li {
+            margin-bottom: 0.5rem;
+        }
+
+        .validation-modal button {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .validation-modal button:hover {
+            background: #1d4ed8;
+        }
+
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .modal-backdrop.show {
+            display: block;
+        }
+
+        .export-modal {
+            border: 2px solid var(--accent);
+        }
+
+        .export-modal h3 {
+            color: var(--accent);
+        }
+
+        .export-modal .track-checkbox-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .export-modal .track-checkbox {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .export-modal .track-checkbox:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .touch-buttons {
+            display: none;
+        }
+
+        .orientation-overlay {
+            display: none;
+        }
+
+        @media (max-height: 900px) and (orientation: portrait) {
+            .orientation-overlay {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--bg-primary);
+                z-index: 9999;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .orientation-icon {
+                font-size: 5rem;
+                margin-bottom: 2rem;
+                animation: rotate-device 2s ease-in-out infinite;
+            }
+
+            @keyframes rotate-device {
+                0%, 100% { transform: rotate(0deg); }
+                50% { transform: rotate(90deg); }
+            }
+
+            .orientation-text {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                line-height: 1.6;
+                max-width: 300px;
+            }
+
+            body.dark-mode .orientation-overlay {
+                background: var(--bg-primary);
+            }
+        }
+
+        @media (max-height: 900px) and (orientation: landscape) {
+            .touch-buttons {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 80px;
+                background: var(--bg-secondary);
+                border-top: 2px solid var(--border);
+                box-shadow: 0 -4px 12px var(--shadow);
+                z-index: 1000;
+                padding: 0;
+            }
+            }
+
+            .touch-button-padding {
+                width: 10%;
+                background: var(--bg-secondary);
+            }
+
+            .touch-button {
+                width: 20%;
+                height: 100%;
+                background: var(--accent);
+                color: white;
+                border: none;
+                font-size: 2rem;
+                font-weight: 700;
+                font-family: 'Space Mono', monospace;
+                cursor: pointer;
+                transition: all 0.1s ease;
+                border-right: 1px solid rgba(255, 255, 255, 0.2);
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+
+            .touch-button:last-of-type {
+                border-right: none;
+            }
+
+            .touch-button:active,
+            .touch-button.active {
+                background: var(--accent-secondary);
+                filter: brightness(1.3);
+                transform: scale(0.98);
+            }
+
+            body.dark-mode .touch-button:active,
+            body.dark-mode .touch-button.active {
+                filter: brightness(1.4);
+            }
+
+            .app-main {
+                padding-bottom: 100px;
+            }
+        
+
+@media (max-height: 900px) and (orientation: landscape) {
+    .app-header {
+        padding: 0.5rem !important;
+    }
+
+    .header-content {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        grid-template-columns: unset !important;
+        grid-template-rows: unset !important;
+    }
+    
+    .app-logo {
+        display: none !important;
+    }
+    
+    .instrument-selector {
+        flex: 0 0 auto;
+    }
+    
+    .instrument-selector label {
+        display: none;
+    }
+    
+    .instrument-dropdown {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .recording-controls,
+    .playback-controls {
+        display: flex;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+    }
+    
+    .btn {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .btn span {
+        font-size: 0.85rem;
+    }
+    
+    .theme-toggle {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+    
+    .btn-theme {
+        padding: 0.4rem !important;
+        font-size: 1rem !important;
+    }
+    
+    .metronom-settings {
+        flex: 1 1 100%;
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .metronom-settings label {
+        font-size: 0.75rem;
+    }
+    
+    .metronom-settings input,
+    .metronom-settings select {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    
+    .toggle-switch {
+        width: 36px;
+        height: 20px;
+    }
+    
+    .toggle-switch::after {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .metronom-toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
+        transform: translateX(16px);
+    }
+    
+    .metronom-toggle-label span:last-child {
+        font-size: 0.75rem;
+    
+
+                padding: 0.15rem;
+                font-size: 0.75rem;
+            
+
+            .notation-table th,
+            .notation-table td {
+                min-width: 42px;
+                padding: 0.3rem 0.35rem;
+                font-size: 0.8rem;
+            }
+            
+            .partitur-container {
+                padding: 0.8rem;
+            }
+            
+            .partitur-header {
+                margin-bottom: 1rem;
+            }
+            
+            .partitur-header h2 {
+                font-size: 1rem;
+                padding-bottom: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .partitur-header-buttons {
+                gap: 0.4rem;
+            }
+            
+            .btn-small {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.7rem;
+            }
+            
+            .app-main {
+                padding: 0 0.5rem;
+                margin: 0.5rem auto;
+            }
+            
+            body {
+                overflow-x: hidden !important;
+            }
+            
+            * {
+                box-sizing: border-box;
+            }
+        }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <div class="app-logo">
+                <span class="logo-klang">Klang</span>
+                <span class="logo-kiste">Kiste</span>
+            </div>
+
+            <div class="header-controls">
+                <div class="instrument-selector">
+                    <select id="instrument" class="instrument-dropdown">
+                        <option value="bariton">Bariton</option>
+                        <option value="sopran">Sopran</option>
+                        <option value="akkord">Akkord</option>
+                    </select>
+                </div>
+
+                <div class="recording-group">
+                    <button id="recButton" class="btn btn-rec">
+                        <span>●</span> REC
+                    </button>
+                    <button id="stopButton" class="btn btn-stop" disabled>
+                        <span>⏹</span> STOP
+                    </button>
+                </div>
+
+                <div class="metronom-settings">
+                    <label>BPM:</label>
+                    <input type="number" id="bpmInput" value="120" min="60" max="300" style="width: 60px;">
+                    <label>Takt:</label>
+                    <select id="timeSignature">
+                        <option value="4/4">4/4</option>
+                        <option value="3/4">3/4</option>
+                        <option value="2/4">2/4</option>
+                    </select>
+                    <label class="metronom-toggle-label">
+                        <input type="checkbox" id="metronomToggle">
+                        <span class="toggle-switch"></span>
+                        <span>Metronom</span>
+                    </label>
+                </div>
+
+                <div class="playback-group">
+                    <button id="playButton" class="btn btn-play" disabled>
+                        <span>▶</span> Play
+                    </button>
+                    <button id="pauseButton" class="btn btn-pause" disabled>
+                        <span>⏸</span> Pause
+                    </button>
+                    <button id="stopPlayButton" class="btn btn-stop" disabled>
+                        <span>⏹</span> Stop
+                    </button>
+                </div>
+            </div>
+
+            <div class="theme-toggle-wrapper">
+                <button id="darkModeToggle" class="btn btn-theme" title="Dark Mode">
+                    🌓
+                </button>
+            </div>
+        </div>
+
+        <div class="editor-panel">
+            <h3>📝 EDITOR-MODUS</h3>
+    
+            <div class="editor-section">
+                <p class="editor-hint">Klicke auf Zellen zum Bearbeiten</p>
+            </div>
+    
+            <div class="editor-section">
+                <div class="editor-section-title">Spalten</div>
+                <button id="insertColumnBtn" class="editor-btn editor-btn-insert">+ Einfügen</button>
+                <button id="deleteColumnBtn" class="editor-btn editor-btn-delete">- Löschen</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="partitur-container">
+            <div class="partitur-header">
+                <h2>Partitur</h2>
+                <div class="partitur-header-buttons">
+                    <button id="toggleCounts" class="btn btn-small">
+                        Zählzeiten anzeigen
+                    </button>
+                    <button id="editorToggle" class="btn btn-small btn-editor">
+                        🔧 Editor AN/AUS
+                    </button>
+                    <button id="exportPartiturBtn" class="btn btn-small">
+                        📤 CSV Export (Partitur)
+                    </button>
+                    <button id="exportAuswahlBtn" class="btn btn-small">
+                        📤 CSV Export (Auswahl)
+                    </button>
+                    <button id="importCsvBtn" class="btn btn-small">
+                        📥 CSV Import
+                    </button>
+                </div>
+            </div>
+    
+            <div class="mobile-editor-buttons">
+                <button id="insertColumnBtnMobile" class="btn btn-small editor-btn-insert">+ Spalte einfügen</button>
+                <button id="deleteColumnBtnMobile" class="btn btn-small editor-btn-delete">- Spalte löschen</button>
+            </div>
+        </div>
+            
+            <div id="partiturContent" class="partitur-content">
+                <div class="empty-state">
+                    <div class="empty-icon">🎵</div>
+                    <p>Wähle ein Instrument und drücke REC um zu beginnen</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="keyboard-info">
+            <p class="info-text">
+                <strong>Tasten:</strong> 0, 1, 2, 3 | <strong>Kombinationen:</strong> Gleichzeitig drücken | <strong>BPM:</strong> <span id="currentBPM">120</span>
+            </p>
+        </div>
+    </main>
+
+    <div class="status-bar">
+        <div id="statusText" class="status-text">Bereit</div>
+        <div id="currentInstrument" class="current-instrument"></div>
+    </div>
+
+    <script>
+        class RecordingEngine {
+            constructor(bpm = 120) {
+                this.bpm = bpm;
+                this.events = [];
+                this.startTime = null;
+                this.lastEventTime = null;
+                this.COMBINATION_WINDOW = 50;
+                this.onLiveUpdate = null; // Callback für Live-Updates
+            }
+
+            start() {
+                this.events = [];
+                this.startTime = performance.now();
+                this.lastEventTime = this.startTime;
+                console.log('⏺️ Recording gestartet');
+            }
+
+            recordKeyPress(keys) {
+                const now = performance.now();
+                const duration = this.lastEventTime ? now - this.lastEventTime : 0;
+                
+                this.events.push({
+                    type: 'keypress',
+                    keys: keys,
+                    timestamp: now,
+                    duration: duration
+                });
+
+                this.lastEventTime = now;
+                console.log(`📝 Key: ${keys}, Zeit: ${duration.toFixed(0)}ms`);
+                
+                if (this.onLiveUpdate) {
+                    this.onLiveUpdate(this.generateNotation());
+                }
+            }
+            
+            mapKeysToNotation(physicalKeys) {
+                if (physicalKeys === 'pause') return 'pause';
+                const keyMap = {'0': '0', '3': '1', '2': '2', '1': '3'};
+                return physicalKeys.split('').map(k => keyMap[k] || k).sort().join('');
+            }
+
+            recordKeyRelease() {
+                const now = performance.now();
+                const duration = now - this.lastEventTime;
+                
+                this.events.push({
+                    type: 'keyrelease',
+                    timestamp: now,
+                    duration: duration
+                });
+
+                this.lastEventTime = now;
+                console.log(`📝 Release, Dauer: ${duration.toFixed(0)}ms`);
+                
+                if (this.onLiveUpdate) {
+                    this.onLiveUpdate(this.generateNotation());
+                }
+            }
+
+            calculateZahlzeit(durationMs) {
+                const bpm = this.bpm;
+                const secondsPerBeat = 60 / bpm;
+                const durationInSeconds = durationMs / 1000;
+                const beats = durationInSeconds / secondsPerBeat;
+                
+                const roundedBeats = this.roundToMusicalValue(beats);
+                const roundedZahlzeit = roundedBeats * secondsPerBeat;
+                
+                return {
+                    beats: roundedBeats,
+                    zahlzeit: roundedZahlzeit
+                };
+            }
+
+            roundToMusicalValue(beats) {
+                const musicalValues = [
+                    0.0625,  // 1/16
+                    0.125,   // 1/8
+                    0.25,    // 1/4
+                    0.375,   // 3/16 (punktierte Achtel)
+                    0.5,     // 1/2
+                    0.75,    // 3/4
+                    1.0,     // Ganze
+                    1.25,    // 1 + 1/4
+                    1.5,     // 1.5
+                    1.75,    // 1 + 3/4
+                    2.0,     // 2 Ganze
+                    2.5,     // 2.5
+                    3.0,     // 3 Ganze
+                    3.5,     // 3.5
+                    4.0,     // 4 Ganze
+                    5.0,
+                    6.0,
+                    7.0,
+                    8.0
+                ];
+                
+                let closest = musicalValues[0];
+                let minDiff = Math.abs(beats - closest);
+                
+                for (const value of musicalValues) {
+                    const diff = Math.abs(beats - value);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closest = value;
+                    }
+                }
+                
+                return closest;
+            }
+
+            generateNotation() {
+                const columns = [];
+                let currentKeys = null;
+                let currentStartTime = null;
+
+                for (let i = 0; i < this.events.length; i++) {
+                    const event = this.events[i];
+
+                    if (event.type === 'keypress') {
+                        if (currentKeys !== null) {
+                            const duration = event.timestamp - currentStartTime;
+                            const timing = this.calculateZahlzeit(duration);
+                            const notationKeys = this.mapKeysToNotation(currentKeys);
+                            columns.push({
+                                keys: notationKeys,
+                                beats: timing.beats,
+                                zahlzeit: timing.zahlzeit,
+                                duration: duration
+                            });
+                        }
+
+                        currentKeys = event.keys;
+                        currentStartTime = event.timestamp;
+
+                    } else if (event.type === 'keyrelease') {
+                        if (currentKeys !== null) {
+                            const duration = event.timestamp - currentStartTime;
+                            const timing = this.calculateZahlzeit(duration);
+                            const notationKeys = this.mapKeysToNotation(currentKeys);
+                            columns.push({
+                                keys: notationKeys,
+                                beats: timing.beats,
+                                zahlzeit: timing.zahlzeit,
+                                duration: duration
+                            });
+                            currentKeys = null;
+                        }
+
+                        if (i + 1 < this.events.length) {
+                            const nextEvent = this.events[i + 1];
+                            const pauseDuration = nextEvent.timestamp - event.timestamp;
+                            
+                            if (pauseDuration > 100) {
+                                const pauseTiming = this.calculateZahlzeit(pauseDuration);
+                                columns.push({
+                                    keys: 'pause',
+                                    beats: pauseTiming.beats,
+                                    zahlzeit: pauseTiming.zahlzeit,
+                                    duration: pauseDuration
+                                });
+                                console.log(`⏸️ Pause: ${pauseDuration.toFixed(0)}ms → Zählzeit ${pauseTiming.zahlzeit.toFixed(3)}s (${pauseTiming.beats.toFixed(2)} Schläge)`);
+                            }
+                        }
+                    }
+                }
+
+                return columns;
+            }
+
+            stop() {
+                console.log('⏹️ Recording gestoppt');
+                return this.generateNotation();
+            }
+        }
+
+        class NotationSystem {
+            constructor() {
+                this.tracks = [];
+                this.showZahlzeit = false;
+                this.instrumentCounters = { bariton: 0, sopran: 0, akkord: 0 };
+                this.liveTrack = null;
+                this.bpmRef = null;
+            }
+
+            setBPMReference(getBPMFunction) {
+                this.bpmRef = getBPMFunction;
+            }
+
+            getBPM() {
+                return this.bpmRef ? this.bpmRef() : 120;
+            }
+
+            startLiveTrack(instrument, instrumentName) {
+                this.instrumentCounters[instrument]++;
+                const count = this.instrumentCounters[instrument];
+                const displayName = count === 1 ? instrumentName : `${instrumentName} ${count}`;
+                
+                this.liveTrack = {
+                    id: Date.now(),
+                    instrument: instrument,
+                    instrumentName: displayName,
+                    columns: [],
+                    isLive: true,
+                    volume: 0.8, // Standard-Lautstärke 80%
+                    active: true // Spur ist aktiv (nicht gemuted)
+                };
+                
+                this.tracks.push(this.liveTrack);
+                console.log(`🔴 Live-Spur gestartet: ${displayName}`);
+            }
+
+            updateLiveTrack(columns) {
+                if (this.liveTrack) {
+                    this.liveTrack.columns = columns;
+                }
+            }
+
+            finalizeLiveTrack() {
+                if (this.liveTrack) {
+                    this.liveTrack.isLive = false;
+                    console.log(`✅ Live-Spur finalisiert: ${this.liveTrack.columns.length} Spalten`);
+                    
+                    this.normalizeTrackLengths();
+                    
+                    this.liveTrack = null;
+                }
+            }
+
+            cancelLiveTrack() {
+                if (this.liveTrack) {
+                    const index = this.tracks.indexOf(this.liveTrack);
+                    if (index > -1 && this.liveTrack.columns.length === 0) {
+                        this.tracks.splice(index, 1);
+                        this.instrumentCounters[this.liveTrack.instrument]--;
+                    }
+                    this.liveTrack = null;
+                }
+            }
+
+            normalizeTrackLengths() {
+                if (this.tracks.length === 0) {
+                    return;
+                }
+
+                let maxColumns = 0;
+                this.tracks.forEach(track => {
+                    if (track.columns.length > maxColumns) {
+                        maxColumns = track.columns.length;
+                    }
+                });
+
+                console.log(`📊 Normalisiere Spurlängen auf ${maxColumns} Spalten`);
+                this.tracks.forEach(track => {
+                    const missing = maxColumns - track.columns.length;
+                    
+                    if (missing > 0) {
+                        console.log(`  → ${track.instrumentName}: +${missing} Pausen`);
+                        
+                        for (let i = 0; i < missing; i++) {
+                            track.columns.push({
+                                keys: 'pause',
+                                beats: 1,
+                                zahlzeit: 0.5,
+                                duration: 0
+                            });
+                        }
+                    }
+                });
+
+                console.log(`✅ Alle Spuren haben jetzt ${maxColumns} Spalten`);
+            }
+
+            addTrack(instrument, instrumentName, columns) {
+                this.instrumentCounters[instrument]++;
+                const count = this.instrumentCounters[instrument];
+                
+                const displayName = count === 1 ? instrumentName : `${instrumentName} ${count}`;
+                
+                this.tracks.push({
+                    id: Date.now(),
+                    instrument: instrument,
+                    instrumentName: displayName,
+                    columns: columns
+                });
+                console.log(`✅ Spur hinzugefügt: ${displayName}, ${columns.length} Spalten`);
+            }
+
+            distributeToLevels(keys) {
+                if (keys === 'pause') {
+                    return { ebene1: null, ebene2: null, ebene3: null };
+                }
+
+                const keyArray = keys.split('').map(Number).sort((a, b) => b - a);
+                
+                return {
+                    ebene1: keyArray[0] !== undefined ? keyArray[0] : null,
+                    ebene2: keyArray[1] !== undefined ? keyArray[1] : null,
+                    ebene3: keyArray[2] !== undefined ? keyArray[2] : null
+                };
+            }
+
+            renderPartitur(containerElement) {
+                if (this.tracks.length === 0) {
+                    containerElement.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🎵</div>
+                            <p>Wähle ein Instrument und drücke REC um zu beginnen</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                this.tracks.forEach(track => {
+                    html += this.renderTrack(track);
+                });
+                containerElement.innerHTML = html;
+            }
+
+            renderTrack(track) {
+                const trackIndex = this.tracks.indexOf(track);
+                const volumePercent = Math.round(track.volume * 100);
+                const columnCount = track.columns.length;
+                
+                let html = `
+                    <div class="track" data-track-index="${trackIndex}">
+                        <div class="track-header">
+                            <span class="track-name ${track.instrument}">
+                                ${track.instrumentName}
+                                <span class="track-column-count">(${columnCount} Pos.)</span>
+                            </span>
+                            <div class="track-controls">
+                                <label class="track-checkbox">
+                                    <input type="checkbox" 
+                                           class="track-active-checkbox" 
+                                           data-track-index="${trackIndex}" 
+                                           ${track.active ? 'checked' : ''}>
+                                    <span>Aktiv</span>
+                                </label>
+                                <div class="track-volume-control">
+                                    <span class="volume-icon">🔊</span>
+                                    <input type="range" 
+                                           class="track-volume-slider" 
+                                           data-track-index="${trackIndex}"
+                                           min="0" 
+                                           max="100" 
+                                           value="${volumePercent}">
+                                    <span class="volume-value">${volumePercent}%</span>
+                                </div>
+                                <button class="track-delete-btn" data-track-index="${trackIndex}">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="notation-table">
+                                <tbody>
+                `;
+
+                html += `<tr><td class="row-label">Ebene 3:</td>`;
+                track.columns.forEach((col, colIndex) => {
+                    const levels = this.distributeToLevels(col.keys);
+                    html += `<td class="${levels.ebene3 === null ? 'empty' : ''}" data-track="${trackIndex}" data-column="${colIndex}" data-row="3">${levels.ebene3 !== null ? levels.ebene3 : ''}</td>`;
+                });
+                html += `</tr>`;
+
+                html += `<tr><td class="row-label">Ebene 2:</td>`;
+                track.columns.forEach((col, colIndex) => {
+                    const levels = this.distributeToLevels(col.keys);
+                    html += `<td class="${levels.ebene2 === null ? 'empty' : ''}" data-track="${trackIndex}" data-column="${colIndex}" data-row="2">${levels.ebene2 !== null ? levels.ebene2 : ''}</td>`;
+                });
+                html += `</tr>`;
+
+                html += `<tr><td class="row-label">Ebene 1:</td>`;
+                track.columns.forEach((col, colIndex) => {
+                    const levels = this.distributeToLevels(col.keys);
+                    html += `<td class="${levels.ebene1 === null ? 'empty' : ''}" data-track="${trackIndex}" data-column="${colIndex}" data-row="1">${levels.ebene1 !== null ? levels.ebene1 : ''}</td>`;
+                });
+                html += `</tr>`;
+
+                html += `<tr class="zahlzeit-row ${this.showZahlzeit ? 'visible' : ''}"><td class="row-label">Zählzeit (s):</td>`;
+                track.columns.forEach((col, colIndex) => {
+                    const displayValue = col.zahlzeit ? col.zahlzeit.toFixed(3) : '0.000';
+                    html += `<td class="row-zahlzeit" data-track="${trackIndex}" data-column="${colIndex}" data-row="0">${displayValue}</td>`;
+                });
+                html += `</tr>`;
+
+                html += `<tr class="beats-row ${this.showZahlzeit ? 'visible' : ''}"><td class="row-label">Beats:</td>`;
+                track.columns.forEach((col, colIndex) => {
+                    const displayValue = col.beats ? col.beats.toFixed(2) : '0.00';
+                    html += `<td class="row-beats" data-track="${trackIndex}" data-column="${colIndex}" data-row="4">${displayValue}</td>`;
+                });
+                html += `</tr>`;
+
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                return html;
+            }
+
+            toggleZahlzeit() {
+                this.showZahlzeit = !this.showZahlzeit;
+                const zahlzeitRows = document.querySelectorAll('.zahlzeit-row');
+                const beatsRows = document.querySelectorAll('.beats-row');
+                zahlzeitRows.forEach(row => {
+                    row.classList.toggle('visible');
+                });
+                beatsRows.forEach(row => {
+                    row.classList.toggle('visible');
+                });
+            }
+
+            clear() {
+                this.tracks = [];
+                this.instrumentCounters = { bariton: 0, sopran: 0, akkord: 0 };
+            }
+
+            deleteTrack(trackIndex) {
+                if (trackIndex >= 0 && trackIndex < this.tracks.length) {
+                    const track = this.tracks[trackIndex];
+                    const deletedInstrument = track.instrument;
+                    console.log(`🗑️ Lösche Spur: ${track.instrumentName}`);
+                    this.tracks.splice(trackIndex, 1);
+                    this.renumberInstrumentTracks(deletedInstrument);
+                }
+            }
+            
+            renumberInstrumentTracks(instrument) {
+                const tracksOfType = this.tracks.filter(t => t.instrument === instrument);
+                if (tracksOfType.length === 0) {
+                    this.instrumentCounters[instrument] = 0;
+                    return;
+                }
+                const instrumentNames = {
+                    'bariton': 'Bariton',
+                    'sopran': 'Sopran', 
+                    'akkord': 'Akkord'
+                };
+                const baseName = instrumentNames[instrument] || instrument;
+                tracksOfType.forEach((track, index) => {
+                    if (index === 0) {
+                        track.instrumentName = baseName;
+                    } else {
+                        track.instrumentName = `${baseName} ${index + 1}`;
+                    }
+                });
+                this.instrumentCounters[instrument] = tracksOfType.length;
+                console.log(`🔄 ${instrument} Spuren neu nummeriert: ${tracksOfType.length} Spur(en)`);
+            }
+
+            insertColumn(trackIndex, columnIndex) {
+                console.log(`➕ Füge Spalte an Position ${columnIndex} in Spur ${trackIndex} ein`);
+                if (trackIndex >= 0 && trackIndex < this.tracks.length) {
+                    const secondsPerBeat = 60 / this.getBPM();
+                    this.tracks[trackIndex].columns.splice(columnIndex, 0, {
+                        keys: 'pause',
+                        beats: 1,
+                        zahlzeit: secondsPerBeat,
+                        duration: 0
+                    });
+                }
+            }
+
+            deleteColumn(trackIndex, columnIndex) {
+                console.log(`➖ Lösche Spalte ${columnIndex} in Spur ${trackIndex}`);
+                if (trackIndex >= 0 && trackIndex < this.tracks.length) {
+                    const track = this.tracks[trackIndex];
+                    if (track.columns.length > 1 && columnIndex < track.columns.length) {
+                        track.columns.splice(columnIndex, 1);
+                    }
+                }
+            }
+
+            validateCellValue(row, value) {
+                if (value === '' || value === null || value === undefined) {
+                    return { valid: true };
+                }
+
+                if (row === 0) {
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue) && numValue >= 0.125) {
+                        return { valid: true };
+                    }
+                    return { 
+                        valid: false, 
+                        message: 'Zählzeit muss mindestens 0.125 Sekunden sein',
+                        allowed: ['Dezimalwerte ≥ 0.125']
+                    };
+                } else if (row === 1) {
+                    const numValue = parseInt(value);
+                    if ([0, 1, 2, 3, 4].includes(numValue)) {
+                        return { valid: true };
+                    }
+                    return { 
+                        valid: false, 
+                        message: 'Ebene 1 erlaubt: 0, 1, 2, 3, 4 oder leer',
+                        allowed: [0, 1, 2, 3, 4, 'leer']
+                    };
+                } else if (row === 2) {
+                    const numValue = parseInt(value);
+                    if ([1, 2].includes(numValue)) {
+                        return { valid: true };
+                    }
+                    return { 
+                        valid: false, 
+                        message: 'Ebene 2 erlaubt: 1, 2 oder leer',
+                        allowed: [1, 2, 'leer']
+                    };
+                } else if (row === 3) {
+                    const numValue = parseInt(value);
+                    if (numValue === 1) {
+                        return { valid: true };
+                    }
+                    return { 
+                        valid: false, 
+                        message: 'Ebene 3 erlaubt: 1 oder leer',
+                        allowed: [1, 'leer']
+                    };
+                } else if (row === 4) {
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue) && numValue >= 0.0625) {
+                        return { valid: true };
+                    }
+                    return { 
+                        valid: false, 
+                        message: 'Beats müssen mindestens 0.0625 (1/16) sein',
+                        allowed: ['Dezimalwerte ≥ 0.0625 (z.B. 0.25, 0.5, 1.0, 2.0)']
+                    };
+                }
+
+                return { valid: false };
+            }
+
+            updateCellValue(trackIndex, columnIndex, row, value) {
+                const validation = this.validateCellValue(row, value);
+                
+                if (!validation.valid) {
+                    return validation;
+                }
+
+                const track = this.tracks[trackIndex];
+                if (!track || !track.columns[columnIndex]) {
+                    return { valid: false, message: 'Ungültige Position' };
+                }
+
+                if (row === 0) {
+                    const newZahlzeit = value === '' ? 0.5 : parseFloat(value);
+                    track.columns[columnIndex].zahlzeit = newZahlzeit;
+                    const secondsPerBeat = 60 / this.getBPM();
+                    track.columns[columnIndex].beats = newZahlzeit / secondsPerBeat;
+                } else if (row === 4) {
+                    const newBeats = value === '' ? 1.0 : parseFloat(value);
+                    track.columns[columnIndex].beats = newBeats;
+                    const secondsPerBeat = 60 / this.getBPM();
+                    track.columns[columnIndex].zahlzeit = newBeats * secondsPerBeat;
+                } else {
+                    const levels = this.distributeToLevels(track.columns[columnIndex].keys);
+                    
+                    if (row === 1) levels.ebene1 = value === '' ? null : parseInt(value);
+                    if (row === 2) levels.ebene2 = value === '' ? null : parseInt(value);
+                    if (row === 3) levels.ebene3 = value === '' ? null : parseInt(value);
+                    
+                    const keys = [];
+                    if (levels.ebene1 !== null) keys.push(levels.ebene1);
+                    if (levels.ebene2 !== null) keys.push(levels.ebene2);
+                    if (levels.ebene3 !== null) keys.push(levels.ebene3);
+                    
+                    track.columns[columnIndex].keys = keys.length > 0 ? keys.sort().join('') : 'pause';
+                }
+
+                console.log(`✏️ Zelle aktualisiert: Track ${trackIndex}, Spalte ${columnIndex}, Zeile ${row}, Wert: ${value}`);
+                return { valid: true };
+            }
+
+            exportToCSV(trackIndices = null) {
+                const tracksToExport = trackIndices 
+                    ? trackIndices.map(i => this.tracks[i]).filter(t => t)
+                    : this.tracks;
+
+                if (tracksToExport.length === 0) {
+                    return '';
+                }
+
+                let csv = '';
+                
+                tracksToExport.forEach((track, index) => {
+                    csv += track.instrumentName + '\n';
+                    
+                    csv += 'Ebene 3';
+                    track.columns.forEach(col => {
+                        const levels = this.distributeToLevels(col.keys);
+                        csv += ';' + (levels.ebene3 !== null ? levels.ebene3 : '');
+                    });
+                    csv += '\n';
+                    
+                    csv += 'Ebene 2';
+                    track.columns.forEach(col => {
+                        const levels = this.distributeToLevels(col.keys);
+                        csv += ';' + (levels.ebene2 !== null ? levels.ebene2 : '');
+                    });
+                    csv += '\n';
+                    
+                    csv += 'Ebene 1';
+                    track.columns.forEach(col => {
+                        const levels = this.distributeToLevels(col.keys);
+                        csv += ';' + (levels.ebene1 !== null ? levels.ebene1 : '');
+                    });
+                    csv += '\n';
+                    
+                    csv += 'Zählzeit';
+                    track.columns.forEach(col => {
+                        const formattedZahlzeit = col.zahlzeit ? col.zahlzeit.toFixed(3) : '0.500';
+                        csv += ';' + formattedZahlzeit;
+                    });
+                    csv += '\n';
+                    
+                    if (index < tracksToExport.length - 1) {
+                        csv += '\n';
+                    }
+                });
+
+                return csv;
+            }
+        }
+
+        class PlaybackEngine {
+            constructor(tracks, bpm, audioContext, instrumentConfig, audioBuffers, notationSystem) {
+                this.tracks = tracks;
+                this.bpm = bpm;
+                this.audioContext = audioContext;
+                this.instrumentConfig = instrumentConfig;
+                this.audioBuffers = audioBuffers;
+                this.notationSystem = notationSystem;
+                
+                this.isPlaying = false;
+                this.activeSources = new Map(); // Pro Spur: Map von Sources
+                this.finishedTracks = new Set(); // Welche Spuren sind fertig?
+                this.onFinish = null; // Callback wenn Playback endet
+                this.onPositionUpdate = null; // Callback für Cursor-Updates
+
+                this.pausedState = null; // Speichert Position bei Pause
+                this.currentPositions = new Map(); // Trackt aktuelle Position jeder Spur
+                
+                console.log('🎬 PlaybackEngine erstellt');
+            }
+            
+            start() {
+                if (this.tracks.length === 0) {
+                    console.log('⚠️ Keine Spuren zum Abspielen');
+                    return;
+                }
+                
+                this.isPlaying = true;
+                this.finishedTracks.clear();
+
+                if (this.pausedState) {
+                    console.log('▶️ Resume von Pause - Starte von gespeicherten Positionen');
+
+                    document.querySelectorAll('.playing').forEach(el => {
+                        el.classList.remove('playing');
+                    });
+
+                    this.tracks.forEach((track, trackIndex) => {
+                        const startColumn = this.pausedState.trackPositions[trackIndex] || 0;
+                        this.playTrackFrom(track, trackIndex, startColumn);
+                    });
+                    this.pausedState = null; // Clear paused state
+                } else {
+                    console.log('▶️ Playback gestartet - Jede Spur läuft mit eigenem Timing');
+                    this.tracks.forEach((track, trackIndex) => {
+                        this.playTrackFrom(track, trackIndex, 0);
+                    });
+                }
+            }
+            
+            async playTrackFrom(track, trackIndex, startColumn = 0) {
+                console.log(`🎵 Starte Spur: ${track.instrumentName} von Spalte ${startColumn + 1}/${track.columns.length}`);
+                
+                let columnIndex = startColumn;
+                
+                while (columnIndex < track.columns.length && this.isPlaying) {
+                    const column = track.columns[columnIndex];
+                    
+                    this.currentPositions.set(trackIndex, columnIndex);
+
+                    if (this.onPositionUpdate) {
+                        this.onPositionUpdate(trackIndex, columnIndex, 'start');
+                    }
+
+                    if (column.keys !== 'pause' && track.active !== false) {
+                        this.playColumnForTrack(track, column, trackIndex, columnIndex);
+                    } else if (column.keys === 'pause') {
+                        console.log(`  ⏸️ ${track.instrumentName} Pos ${columnIndex + 1}: Pause (${column.zahlzeit.toFixed(3)}s)`);
+                    } else {
+                        console.log(`  🔇 ${track.instrumentName} Pos ${columnIndex + 1}: Stumm`);
+                    }
+ 
+                    const duration = column.zahlzeit * 1000;
+                    await this.sleep(duration);
+
+                    if (!this.isPlaying) {
+                        console.log(`⏸️ Spur ${trackIndex} pausiert bei Spalte ${columnIndex}`);
+                        return; // RETURN statt break - verhindert trackFinished() Aufruf!
+                    }
+
+                    this.stopTrackSounds(trackIndex);
+
+                    if (this.onPositionUpdate) {
+                        this.onPositionUpdate(trackIndex, columnIndex, 'end');
+                    }
+                    
+                    columnIndex++;
+                }
+
+                console.log(`✅ Spur beendet: ${track.instrumentName}`);
+                this.trackFinished(trackIndex);
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            trackFinished(trackIndex) {
+                this.finishedTracks.add(trackIndex);
+                this.stopTrackSounds(trackIndex);
+                if (this.finishedTracks.size === this.tracks.length) {
+                    console.log('✅ Alle Spuren beendet');
+                    this.stop();
+                }
+            }
+            
+            playColumnForTrack(track, column, trackIndex, columnIndex) {
+                const instrument = track.instrument;
+
+                if (column.keys === 'pause') return;
+
+                const notationKeys = column.keys;
+                const physicalKeys = this.mapNotationToPhysicalKeys(notationKeys);
+                const combo = physicalKeys;
+                
+                if (!combo) return;
+
+                const config = this.instrumentConfig[instrument];
+                if (!config || !config.sounds[combo]) {
+                    console.log(`  ⚠️ ${track.instrumentName}: Sound ${combo} nicht gefunden (Notation: ${notationKeys})`);
+                    return;
+                }
+
+                const buffer = this.audioBuffers[instrument][combo];
+                if (!buffer) {
+                    console.log(`  ⚠️ ${track.instrumentName}: Buffer ${combo} nicht geladen`);
+                    return;
+                }
+
+                const source = this.audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+
+                const gainNode = this.audioContext.createGain();
+                const trackVolume = track.volume !== undefined ? track.volume : 0.8;
+                gainNode.gain.value = trackVolume;
+
+                source.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                source.start(0);
+
+                if (!this.activeSources.has(trackIndex)) {
+                    this.activeSources.set(trackIndex, []);
+                }
+                this.activeSources.get(trackIndex).push({ source, gainNode });
+                
+                const duration = column.zahlzeit;
+                const volumePercent = Math.round(trackVolume * 100);
+                console.log(`  🔊 ${track.instrumentName} Pos ${columnIndex + 1}: Notation=${notationKeys} → Physisch=${combo} (${column.zahlzeit.toFixed(3)}s) Vol:${volumePercent}%`);
+            }
+
+            mapNotationToPhysicalKeys(notationKeys) {
+                if (notationKeys === 'pause') return 'pause';
+                const reverseMap = {'0': '0', '1': '3', '2': '2', '3': '1'};
+                return notationKeys.split('').map(k => reverseMap[k] || k).sort().join('');
+            }
+            
+            stopTrackSounds(trackIndex) {
+                const sources = this.activeSources.get(trackIndex);
+                if (!sources) return;
+                
+                sources.forEach(({ source, gainNode }) => {
+                    try {
+                        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.05);
+                        setTimeout(() => {
+                            try {
+                                source.stop();
+                                source.disconnect();
+                                gainNode.disconnect();
+                            } catch (e) {
+                            }
+                        }, 60);
+                    } catch (e) {
+                    }
+                });
+                
+                this.activeSources.set(trackIndex, []);
+            }
+            
+            stopAllSounds() {
+                this.activeSources.forEach((sources, trackIndex) => {
+                    this.stopTrackSounds(trackIndex);
+                });
+                this.activeSources.clear();
+            }
+            
+            pause() {
+                if (!this.isPlaying) {
+                    console.log('⚠️ Playback läuft nicht, kann nicht pausieren');
+                    return;
+                }
+                
+                console.log('⏸️ Playback pausiert');
+                
+                const currentPositions = [];
+                this.tracks.forEach((track, trackIndex) => {
+                    const pos = this.currentPositions.get(trackIndex);
+                    if (pos !== undefined) {
+                        currentPositions[trackIndex] = pos;
+                        console.log(`  Spur ${trackIndex} bei Spalte ${pos}`);
+                    } else {
+                        currentPositions[trackIndex] = 0;
+                    }
+                });
+                
+                this.pausedState = {
+                    trackPositions: currentPositions
+                };
+                this.isPlaying = false;
+
+                this.stopAllSounds();
+                
+                console.log('💾 Position gespeichert für Resume:', currentPositions);
+            }
+            
+            resume() {
+                if (this.isPlaying) {
+                    console.log('⚠️ Playback läuft bereits');
+                    return;
+                }
+                
+                if (!this.pausedState) {
+                    console.log('⚠️ Keine gespeicherte Position, starte von vorne');
+                }
+                this.start();
+            }
+            
+            jumpToColumn(columnIndex) {
+                console.log(`🎯 Springe zu Spalte ${columnIndex}`);
+
+                if (this.tracks.length === 0) {
+                    console.log('⚠️ Keine Spuren vorhanden');
+                    return;
+                }
+                
+                const maxColumns = this.tracks[0].columns.length;
+                if (columnIndex < 0 || columnIndex >= maxColumns) {
+                    console.log(`⚠️ Ungültige Spalte: ${columnIndex} (max: ${maxColumns - 1})`);
+                    return;
+                }
+
+                this.tracks.forEach((track, trackIndex) => {
+                    this.currentPositions.set(trackIndex, columnIndex);
+                });
+
+                this.stopAllSounds();
+
+                document.querySelectorAll('.playing').forEach(el => {
+                    el.classList.remove('playing');
+                });
+
+                console.log('  → Position gesetzt für Pause/Stopped');
+                this.pausedState = { 
+                    trackPositions: Array.from({length: this.tracks.length}, () => columnIndex) 
+                };
+
+                this.tracks.forEach((track, trackIndex) => {
+                    if (this.onPositionUpdate) {
+                        this.onPositionUpdate(trackIndex, columnIndex, 'start');
+                    }
+                });
+            }
+            
+            stop() {
+                console.log('⏹️ Playback gestoppt');
+                this.isPlaying = false;
+                this.pausedState = null; // Clear paused state - nächstes Play startet von vorne
+                this.stopAllSounds();
+
+                document.querySelectorAll('.playing').forEach(el => {
+                    el.classList.remove('playing');
+                });
+                
+                if (this.onFinish) {
+                    this.onFinish();
+                }
+            }
+        }
+
+        class MusikApp {
+            constructor() {
+                this.audioContext = null;
+                this.audioBuffers = { bariton: {}, sopran: {}, akkord: {}, metronom: {} };
+                this.currentInstrument = 'bariton';
+                this.isRecording = false;
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.activeKeys = new Set();
+                this.activeSources = new Map();
+                this.bpm = 120;
+                this.timeSignature = '4/4';
+                this.metronomEnabled = false;
+                this.metronomInterval = null;
+                this.metronomBeat = 0;
+                this.editorMode = false;
+                this.columnInsertMode = false;
+                this.columnDeleteMode = false;
+                this.markedColumns = new Map();
+                this.isRightDragging = false;
+                
+                this.recordingEngine = null;
+                this.playbackEngine = null;
+                this.notationSystem = new NotationSystem();
+                this.notationSystem.setBPMReference(() => this.bpm);
+                this.combinationTimer = null;
+                this.currentPressedKeys = new Set();
+                this.activeTouches = new Set();
+                this.touchCombinationTimer = null;
+                
+                this.elements = {
+                    instrument: document.getElementById('instrument'),
+                    recButton: document.getElementById('recButton'),
+                    editorToggle: document.getElementById('editorToggle'),
+                    insertColumnBtn: document.getElementById('insertColumnBtn'),
+                    deleteColumnBtn: document.getElementById('deleteColumnBtn'),
+                    insertColumnBtnMobile: document.getElementById('insertColumnBtnMobile'),
+                    deleteColumnBtnMobile: document.getElementById('deleteColumnBtnMobile'),
+                    validationModal: document.getElementById('validationModal'),
+                    validationMessage: document.getElementById('validationMessage'),
+                    validationAllowedValues: document.getElementById('validationAllowedValues'),
+                    validationOkBtn: document.getElementById('validationOkBtn'),
+                    modalBackdrop: document.getElementById('modalBackdrop'),
+                    stopButton: document.getElementById('stopButton'),
+                    playButton: document.getElementById('playButton'),
+                    pauseButton: document.getElementById('pauseButton'),
+                    stopPlayButton: document.getElementById('stopPlayButton'),
+                    darkModeToggle: document.getElementById('darkModeToggle'),
+                    statusText: document.getElementById('statusText'),
+                    currentInstrument: document.getElementById('currentInstrument'),
+                    partiturContent: document.getElementById('partiturContent'),
+                    toggleCounts: document.getElementById('toggleCounts'),
+                    bpmInput: document.getElementById('bpmInput'),
+                    currentBPM: document.getElementById('currentBPM'),
+                    metronomToggle: document.getElementById('metronomToggle'),
+                    timeSignature: document.getElementById('timeSignature'),
+                    exportPartiturBtn: document.getElementById('exportPartiturBtn'),
+                    exportAuswahlBtn: document.getElementById('exportAuswahlBtn'),
+                    exportModal: document.getElementById('exportModal'),
+                    exportTrackList: document.getElementById('exportTrackList'),
+                    exportCancelBtn: document.getElementById('exportCancelBtn'),
+                    exportConfirmBtn: document.getElementById('exportConfirmBtn'),
+                    importCsvBtn: document.getElementById('importCsvBtn'),
+                    importWarningModal: document.getElementById('importWarningModal'),
+                    importCancelBtn: document.getElementById('importCancelBtn'),
+                    importConfirmBtn: document.getElementById('importConfirmBtn'),
+                    csvFileInput: document.getElementById('csvFileInput'),
+                    importErrorModal: document.getElementById('importErrorModal'),
+                    importErrorMessage: document.getElementById('importErrorMessage'),
+                    importErrorOkBtn: document.getElementById('importErrorOkBtn')
+                };
+                
+                this.instrumentConfig = {
+                    bariton: {
+                        name: 'Bariton',
+                        sounds: {
+                            '0': 'sounds/bariton_g3.mp3',
+                            '3': 'sounds/bariton_a3.mp3',
+                            '2': 'sounds/bariton_h3.mp3',
+                            '23': 'sounds/bariton_c4.mp3',
+                            '1': 'sounds/bariton_d4.mp3',
+                            '13': 'sounds/bariton_e4.mp3',
+                            '12': 'sounds/bariton_f4.mp3',
+                            '123': 'sounds/bariton_g4.mp3'
+                        }
+                    },
+                    sopran: {
+                        name: 'Sopran',
+                        sounds: {
+                            '0': 'sounds/sopran_g4.mp3',
+                            '3': 'sounds/sopran_a4.mp3',
+                            '2': 'sounds/sopran_h4.mp3',
+                            '23': 'sounds/sopran_c5.mp3',
+                            '1': 'sounds/sopran_d5.mp3',
+                            '13': 'sounds/sopran_e5.mp3',
+                            '12': 'sounds/sopran_f5.mp3',
+                            '123': 'sounds/sopran_g5.mp3'
+                        }
+                    },
+                    akkord: {
+                        name: 'Akkord',
+                        sounds: {
+                            '0': 'sounds/akkord_c_dur.mp3',
+                            '3': 'sounds/akkord_g_dur.mp3',
+                            '2': 'sounds/akkord_f_dur.mp3',
+                            '23': 'sounds/akkord_d_dur.mp3',
+                            '1': 'sounds/akkord_a_moll.mp3'
+                        }
+                    },
+                    metronom: {
+                        name: 'Metronom',
+                        sounds: {
+                            'accent': 'sounds/metronome_accent.mp3',
+                            'normal': 'sounds/metronome_normal.mp3'
+                        }
+                    }
+                };
+                
+                this.init();
+            }
+            
+            async init() {
+                console.log('🎵 Starte App Phase 5B FINAL (CSV Import/Export + Metronom)...');
+                console.log('✅ PHASE 5 KOMPLETT ABGESCHLOSSEN!');
+                this.loadDarkMode();
+                await this.initAudioContext();
+                await this.loadAllSounds();
+                this.setupEventListeners();
+                this.updateInstrumentDisplay();
+                this.updateBPMDisplay();
+                this.updatePlayButtonState();
+                this.updateExportButtons();
+                this.updateStatus('Bereit!');
+                console.log('✅ App bereit!');
+            }
+            
+            async initAudioContext() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('✅ Audio Context OK');
+            }
+            
+            async loadAllSounds() {
+                this.updateStatus('Lade Sounds...');
+                for (const [instrument, config] of Object.entries(this.instrumentConfig)) {
+                    for (const [key, file] of Object.entries(config.sounds)) {
+                        try {
+                            const buffer = await this.loadSound(file);
+                            this.audioBuffers[instrument][key] = buffer;
+                        } catch (e) {
+                            console.error(`Fehler beim Laden: ${file}`, e);
+                        }
+                    }
+                    console.log(`✅ ${config.name} geladen`);
+                }
+                this.updateStatus('Bereit!');
+            }
+            
+            async loadSound(url) {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                return await this.audioContext.decodeAudioData(arrayBuffer);
+            }
+            
+            setupEventListeners() {
+                this.elements.instrument.addEventListener('change', (e) => {
+                    this.currentInstrument = e.target.value;
+                    this.updateInstrumentDisplay();
+                });
+                
+                this.elements.recButton.addEventListener('click', () => this.startRecording());
+                this.elements.stopButton.addEventListener('click', () => this.stopRecording());
+                this.elements.playButton.addEventListener('click', () => this.handlePlayButton());
+                this.elements.pauseButton.addEventListener('click', () => this.pausePlayback());
+                this.elements.stopPlayButton.addEventListener('click', () => this.stopPlayback());
+                
+                this.elements.darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
+                this.elements.toggleCounts.addEventListener('click', () => this.toggleZahlzeit());
+                this.elements.editorToggle.addEventListener('click', () => this.toggleEditorMode());
+                this.elements.insertColumnBtn.addEventListener('click', () => this.startInsertColumnMode());
+                this.elements.deleteColumnBtn.addEventListener('click', () => this.startDeleteColumnMode());
+                this.elements.insertColumnBtnMobile.addEventListener('click', () => this.startInsertColumnMode());
+                this.elements.deleteColumnBtnMobile.addEventListener('click', () => this.startDeleteColumnMode());
+                
+                this.elements.exportPartiturBtn.addEventListener('click', () => this.exportPartitur());
+                this.elements.exportAuswahlBtn.addEventListener('click', () => this.showExportModal());
+                this.elements.exportCancelBtn.addEventListener('click', () => this.hideExportModal());
+                this.elements.exportConfirmBtn.addEventListener('click', () => this.exportAuswahl());
+                
+                this.elements.importCsvBtn.addEventListener('click', () => this.showImportWarning());
+                this.elements.importCancelBtn.addEventListener('click', () => this.hideImportWarning());
+                this.elements.importConfirmBtn.addEventListener('click', () => this.triggerFileSelect());
+                this.elements.csvFileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+                this.elements.importErrorOkBtn.addEventListener('click', () => this.hideImportError());
+                
+                this.elements.bpmInput.addEventListener('change', (e) => {
+                    const oldBPM = this.bpm;
+                    const newBPM = parseInt(e.target.value);
+                    this.bpm = newBPM;
+                    this.updateBPMDisplay();
+                    this.recalculateAllZahlzeiten(oldBPM, newBPM);
+                    if (this.metronomEnabled) {
+                        this.stopMetronom();
+                        this.startMetronom();
+                    }
+                });
+
+                this.elements.timeSignature.addEventListener('change', (e) => {
+                    this.timeSignature = e.target.value;
+                    if (this.metronomEnabled) {
+                        this.stopMetronom();
+                        this.startMetronom();
+                    }
+                });
+
+                this.elements.metronomToggle.addEventListener('change', (e) => {
+                    this.metronomEnabled = e.target.checked;
+                    if (this.metronomEnabled) {
+                        this.startMetronom();
+                    } else {
+                        this.stopMetronom();
+                    }
+                });
+                
+                this.elements.partiturContent.addEventListener('click', (e) => {
+                    this.handleTableClick(e);
+                });
+
+                this.elements.partiturContent.addEventListener('contextmenu', (e) => {
+                    this.handleTableRightClick(e);
+                });
+
+                this.elements.partiturContent.addEventListener('mousedown', (e) => {
+                    if (e.button === 2 && this.columnDeleteMode) {
+                        this.isRightDragging = true;
+                        const cell = e.target.closest('td[data-column]');
+                        if (cell) {
+                            const trackIndex = parseInt(cell.dataset.track);
+                            const columnIndex = parseInt(cell.dataset.column);
+                            this.toggleColumnMark(trackIndex, columnIndex);
+                        }
+                    }
+                });
+
+                this.elements.partiturContent.addEventListener('mousemove', (e) => {
+                    if (this.isRightDragging && this.columnDeleteMode) {
+                        const cell = e.target.closest('td[data-column]');
+                        if (cell) {
+                            const trackIndex = parseInt(cell.dataset.track);
+                            const columnIndex = parseInt(cell.dataset.column);
+                            const key = `${trackIndex}-${columnIndex}`;
+                            if (!this.markedColumns.has(key)) {
+                                this.toggleColumnMark(trackIndex, columnIndex);
+                            }
+                        }
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    this.isRightDragging = false;
+                });
+
+                this.elements.partiturContent.addEventListener('mouseover', (e) => {
+                    const cell = e.target.closest('td[data-column]');
+                    if (!cell) return;
+                    
+                    const columnIndex = cell.dataset.column;
+                    document.querySelectorAll(`td[data-column="${columnIndex}"]`).forEach(el => {
+                        el.classList.add('column-hover');
+                    });
+                });
+                
+                this.elements.partiturContent.addEventListener('mouseout', (e) => {
+                    const cell = e.target.closest('td[data-column]');
+                    if (!cell) return;
+                    
+                    document.querySelectorAll('.column-hover').forEach(el => {
+                        el.classList.remove('column-hover');
+                    });
+                });
+
+                this.elements.partiturContent.addEventListener('input', (e) => {
+                    if (e.target.classList.contains('track-volume-slider')) {
+                        this.handleVolumeChange(e);
+                    }
+                });
+                
+                this.elements.partiturContent.addEventListener('change', (e) => {
+                    if (e.target.classList.contains('track-active-checkbox')) {
+                        this.handleTrackActiveChange(e);
+                    }
+                });
+
+                this.elements.partiturContent.addEventListener('blur', (e) => {
+                    this.handleCellBlur(e);
+                }, true);
+
+                this.elements.validationOkBtn.addEventListener('click', () => this.closeValidationModal());
+                this.elements.modalBackdrop.addEventListener('click', () => this.closeValidationModal());
+                
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+
+                const touchButtons = document.querySelectorAll('.touch-button');
+                touchButtons.forEach(button => {
+                    button.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                    button.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+                    button.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+                });
+            }
+            
+            startRecording() {
+                if (this.editorMode) {
+                    console.log('📝 Editor-Modus wird für Aufnahme deaktiviert');
+                    this.toggleEditorMode();
+                }
+                
+                this.isRecording = true;
+                this.recordingEngine = new RecordingEngine(this.bpm);
+
+                this.recordingEngine.onLiveUpdate = (columns) => {
+                    this.notationSystem.updateLiveTrack(columns);
+                    this.notationSystem.renderPartitur(this.elements.partiturContent);
+                    this.updateExportButtons();
+                };
+                
+                this.recordingEngine.start();
+
+                const instrumentName = this.instrumentConfig[this.currentInstrument].name;
+                this.notationSystem.startLiveTrack(this.currentInstrument, instrumentName);
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                
+                if (this.metronomEnabled && !this.metronomInterval) {
+                    console.log('🎵 Starte Metronom für Aufnahme');
+                    this.startMetronom();
+                }
+                
+                this.elements.recButton.classList.add('active');
+                this.elements.recButton.disabled = true;
+                this.elements.stopButton.disabled = false;
+                this.elements.playButton.disabled = true;
+                this.updateStatus('🔴 AUFNAHME - Tasten: 0, 1, 2, 3');
+                console.log('▶️ REC gestartet');
+            }
+            
+            stopRecording() {
+                if (!this.recordingEngine) return;
+
+                this.isRecording = false;
+                this.stopAllSounds();
+                
+                const columns = this.recordingEngine.stop();
+                
+                if (columns.length > 0) {
+                    this.notationSystem.finalizeLiveTrack();
+                    this.notationSystem.renderPartitur(this.elements.partiturContent);
+                    
+                    this.updateStatus(`✅ Aufnahme gespeichert: ${columns.length} Positionen`);
+                    console.log(`✅ Notation erstellt: ${columns.length} Spalten`);
+                } else {
+                    this.notationSystem.cancelLiveTrack();
+                    this.notationSystem.renderPartitur(this.elements.partiturContent);
+                    this.updateStatus('⚠️ Keine Noten aufgenommen');
+                }
+                
+                this.elements.recButton.classList.remove('active');
+                this.elements.recButton.disabled = false;
+                this.elements.stopButton.disabled = true;
+                this.recordingEngine = null;
+
+                this.updatePlayButtonState();
+                this.updateExportButtons();
+            }
+            
+            handlePlayButton() {
+                
+                if (this.isPaused) {
+                    this.resumePlayback();
+                } else {
+                    this.startPlayback();
+                }
+            }
+            
+            startPlayback() {
+                if (this.notationSystem.tracks.length === 0) {
+                    this.updateStatus('⚠️ Keine Partitur zum Abspielen');
+                    console.log('⚠️ Keine Spuren vorhanden');
+                    return;
+                }
+                
+                console.log('🎬 Starte Playback...');
+                this.isPlaying = true;
+                this.isPaused = false;
+                
+                if (!this.playbackEngine) {
+                    this.playbackEngine = new PlaybackEngine(
+                        this.notationSystem.tracks,
+                        this.bpm,
+                        this.audioContext,
+                        this.instrumentConfig,
+                        this.audioBuffers,
+                        this.notationSystem
+                    );
+                    
+                    this.playbackEngine.onFinish = () => {
+                        this.onPlaybackFinished();
+                    };
+
+                    this.playbackEngine.onPositionUpdate = (trackIndex, columnIndex, action) => {
+                        this.updatePlaybackCursor(trackIndex, columnIndex, action);
+                    };
+                }
+                this.playbackEngine.start();
+
+                if (this.metronomEnabled && !this.metronomInterval) {
+                    console.log('🎵 Starte Metronom für Playback');
+                    this.startMetronom();
+                }
+
+                this.updatePlaybackButtons('playing');
+                this.updateStatus('▶️ PLAYBACK läuft');
+            }
+            
+            pausePlayback() {
+                if (!this.playbackEngine || !this.isPlaying) {
+                    console.log('⚠️ Kein aktives Playback zum Pausieren');
+                    return;
+                }
+                
+                console.log('⏸️ Pausiere Playback...');
+                this.playbackEngine.pause();
+                this.isPlaying = false;
+                this.isPaused = true;
+
+                if (this.metronomInterval) {
+                    console.log('⏸️ Pausiere Metronom');
+                    this.stopMetronom();
+                }
+
+                this.updatePlaybackButtons('paused');
+                this.updateStatus('⏸️ PAUSIERT - Drücke Play zum Fortfahren');
+            }
+            
+            resumePlayback() {
+                if (!this.playbackEngine || !this.isPaused) {
+                    console.log('⚠️ Nichts zu resumieren');
+                    return;
+                }
+                
+                console.log('▶️ Resume Playback...');
+                this.playbackEngine.resume();
+                this.isPlaying = true;
+                this.isPaused = false;
+
+                if (this.metronomEnabled && !this.metronomInterval) {
+                    console.log('▶️ Resume Metronom');
+                    this.startMetronom();
+                }
+
+                this.updatePlaybackButtons('playing');
+                this.updateStatus('▶️ PLAYBACK läuft');
+            }
+            
+            stopPlayback() {
+                if (!this.playbackEngine) {
+                    console.log('⚠️ Kein Playback zum Stoppen');
+                    return;
+                }
+                
+                console.log('⏹️ Stoppe Playback...');
+                this.playbackEngine.stop();
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.playbackEngine = null;
+
+                this.updatePlaybackButtons('stopped');
+                this.updateStatus('⏹️ Playback gestoppt');
+            }
+            
+            handleTableClick(e) {
+                if (e.target.classList.contains('track-delete-btn')) {
+                    const trackIndex = parseInt(e.target.dataset.trackIndex);
+                    this.deleteTrack(trackIndex);
+                    return;
+                }
+
+                const cell = e.target.closest('td[data-column]');
+                if (!cell) return;
+                
+                const columnIndex = parseInt(cell.dataset.column);
+                const trackIndex = parseInt(cell.dataset.track);
+                const isMobile = window.innerWidth < 768;
+                
+                if (this.columnInsertMode) {
+                    this.insertColumn(trackIndex, columnIndex);
+                    return;
+                }
+                
+                if (this.columnDeleteMode) {
+                    if (isMobile) {
+                        this.toggleColumnMark(trackIndex, columnIndex);
+                    } else {
+                        if (this.markedColumns.size > 0) {
+                            this.deleteMarkedColumns();
+                        } else {
+                            this.deleteSingleColumn(trackIndex, columnIndex);
+                        }
+                    }
+                    return;
+                }
+                
+                if (!this.isPlaying && !this.editorMode) {
+                    console.log(`👆 Spalte ${columnIndex} geklickt`);
+                    if (!this.playbackEngine) {
+                        console.log('  → Erstelle Engine für Vorschau');
+                        this.playbackEngine = new PlaybackEngine(
+                            this.notationSystem.tracks,
+                            this.bpm,
+                            this.audioContext,
+                            this.instrumentConfig,
+                            this.audioBuffers,
+                            this.notationSystem
+                        );
+                        
+                        this.playbackEngine.onFinish = () => {
+                            this.onPlaybackFinished();
+                        };
+                        
+                        this.playbackEngine.onPositionUpdate = (trackIndex, colIndex, action) => {
+                            this.updatePlaybackCursor(trackIndex, colIndex, action);
+                        };
+                    }
+
+                    this.playbackEngine.jumpToColumn(columnIndex);
+
+                    if (this.isPaused) {
+                        this.updateStatus(`⏸️ PAUSIERT - Position: Spalte ${columnIndex + 1}`);
+                    } else {
+                        this.updateStatus(`🎯 Startposition: Spalte ${columnIndex + 1}`);
+                    }
+                }
+            }
+
+            handleTableRightClick(e) {
+                if (!this.columnDeleteMode) return;
+                e.preventDefault();
+            }
+
+            toggleColumnMark(trackIndex, columnIndex) {
+                const key = `${trackIndex}-${columnIndex}`;
+                
+                if (this.markedColumns.has(key)) {
+                    this.markedColumns.delete(key);
+                    document.querySelectorAll(`td[data-track="${trackIndex}"][data-column="${columnIndex}"]`).forEach(el => {
+                        el.classList.remove('marked-for-deletion');
+                    });
+                    console.log(`➖ Spur ${trackIndex}, Spalte ${columnIndex} abgewählt`);
+                } else {
+                    this.markedColumns.set(key, {trackIndex, columnIndex});
+                    document.querySelectorAll(`td[data-track="${trackIndex}"][data-column="${columnIndex}"]`).forEach(el => {
+                        el.classList.add('marked-for-deletion');
+                    });
+                    console.log(`➕ Spur ${trackIndex}, Spalte ${columnIndex} markiert`);
+                }
+                
+                const isMobile = window.innerWidth < 768;
+                if (isMobile) {
+                    this.updateStatus(`➖ ${this.markedColumns.size} Spalte(n) markiert | [- Löschen] = Ausführen`);
+                } else {
+                    this.updateStatus(`➖ ${this.markedColumns.size} Spalte(n) markiert | LINKS-Klick = Löschen`);
+                }
+            }
+            
+            handleVolumeChange(e) {
+                const trackIndex = parseInt(e.target.dataset.trackIndex);
+                const volume = parseInt(e.target.value) / 100; // 0-100 → 0.0-1.0
+
+                if (this.notationSystem.tracks[trackIndex]) {
+                    this.notationSystem.tracks[trackIndex].volume = volume;
+                    console.log(`🔊 Spur ${trackIndex} Lautstärke: ${Math.round(volume * 100)}%`);
+
+                    const volumeValue = e.target.parentElement.querySelector('.volume-value');
+                    if (volumeValue) {
+                        volumeValue.textContent = `${Math.round(volume * 100)}%`;
+                    }
+                    if (this.playbackEngine && this.playbackEngine.tracks[trackIndex]) {
+                        this.playbackEngine.tracks[trackIndex].volume = volume;
+                    }
+                }
+            }
+            
+            handleTrackActiveChange(e) {
+                const trackIndex = parseInt(e.target.dataset.trackIndex);
+                const active = e.target.checked;
+
+                if (this.notationSystem.tracks[trackIndex]) {
+                    this.notationSystem.tracks[trackIndex].active = active;
+                    console.log(`${active ? '✅' : '❌'} Spur ${trackIndex} ${active ? 'aktiviert' : 'deaktiviert'}`);
+
+                    if (this.playbackEngine && this.playbackEngine.tracks[trackIndex]) {
+                        this.playbackEngine.tracks[trackIndex].active = active;
+
+                        if (!active && this.isPlaying) {
+                            this.playbackEngine.stopTrackSounds(trackIndex);
+                        }
+                    }
+                }
+            }
+
+            handleCellBlur(e) {
+                if (!this.editorMode) return;
+                if (!e.target.hasAttribute('contenteditable')) return;
+                
+                const cell = e.target;
+                const trackIndex = parseInt(cell.dataset.track);
+                const columnIndex = parseInt(cell.dataset.column);
+                const row = parseInt(cell.dataset.row);
+                
+                if (isNaN(trackIndex) || isNaN(columnIndex) || isNaN(row)) {
+                    console.log('⚠️ Blur-Event für ungültige Zelle ignoriert');
+                    return;
+                }
+                
+                const track = this.notationSystem.tracks[trackIndex];
+                if (!track || !track.columns[columnIndex]) {
+                    console.log('⚠️ Blur-Event für gelöschte Zelle ignoriert');
+                    return;
+                }
+                
+                const value = cell.textContent.trim();
+                
+                console.log(`✏️ Zelle bearbeitet: Track ${trackIndex}, Spalte ${columnIndex}, Zeile ${row}, Wert: "${value}"`);
+                
+                const result = this.notationSystem.updateCellValue(trackIndex, columnIndex, row, value);
+                
+                if (!result.valid) {
+                    console.log('❌ Ungültige Eingabe:', result.message);
+                    this.showValidationError(result.message, result.allowed);
+                    
+                    if (row === 0) {
+                        cell.textContent = track.columns[columnIndex].zahlzeit;
+                    } else {
+                        const levels = this.notationSystem.distributeToLevels(track.columns[columnIndex].keys);
+                        if (row === 1) cell.textContent = levels.ebene1 !== null ? levels.ebene1 : '';
+                        if (row === 2) cell.textContent = levels.ebene2 !== null ? levels.ebene2 : '';
+                        if (row === 3) cell.textContent = levels.ebene3 !== null ? levels.ebene3 : '';
+                    }
+                } else {
+                    console.log('✅ Wert aktualisiert');
+                    if (value !== '') {
+                        cell.classList.remove('empty');
+                    } else {
+                        cell.classList.add('empty');
+                    }
+                }
+            }
+            
+            updatePlaybackButtons(state) {
+                
+                switch(state) {
+                    case 'stopped':
+                        this.elements.playButton.disabled = false;
+                        this.elements.pauseButton.disabled = true;
+                        this.elements.stopPlayButton.disabled = true;
+                        this.elements.recButton.disabled = false;
+                        break;
+                        
+                    case 'playing':
+                        this.elements.playButton.disabled = true;
+                        this.elements.pauseButton.disabled = false;
+                        this.elements.stopPlayButton.disabled = false;
+                        this.elements.recButton.disabled = true;
+                        break;
+                        
+                    case 'paused':
+                        this.elements.playButton.disabled = false; // Play = Resume
+                        this.elements.pauseButton.disabled = true;
+                        this.elements.stopPlayButton.disabled = false;
+                        this.elements.recButton.disabled = true;
+                        break;
+                }
+            }
+            
+            updatePlaybackCursor(trackIndex, columnIndex, action) {
+                const cells = document.querySelectorAll(
+                    `td[data-track="${trackIndex}"][data-column="${columnIndex}"]`
+                );
+                
+                if (action === 'start') {
+                    cells.forEach(cell => {
+                        cell.classList.add('playing');
+                    });
+                    console.log(`🎯 Cursor: Spur ${trackIndex}, Spalte ${columnIndex} → AN`);
+                } else if (action === 'end') {
+                    cells.forEach(cell => {
+                        cell.classList.remove('playing');
+                    });
+                    console.log(`🎯 Cursor: Spur ${trackIndex}, Spalte ${columnIndex} → AUS`);
+                }
+            }
+            
+            onPlaybackFinished() {
+                console.log('✅ Playback beendet');
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.playbackEngine = null;
+                document.querySelectorAll('.playing').forEach(el => {
+                    el.classList.remove('playing');
+                });
+                this.updatePlaybackButtons('stopped');
+                this.updateStatus('✅ Playback beendet');
+            }
+            
+            updatePlayButtonState() {
+                const hasContent = this.notationSystem.tracks.length > 0;
+                this.elements.playButton.disabled = !hasContent || this.isRecording;
+            }
+            
+            handleKeyDown(e) {
+                if (!this.isRecording || e.repeat) return;
+                if (!['0', '1', '2', '3'].includes(e.key)) return;
+                
+                this.currentPressedKeys.add(e.key);
+                
+                if (this.combinationTimer) {
+                    clearTimeout(this.combinationTimer);
+                }
+                
+                this.combinationTimer = setTimeout(() => {
+                    const combo = Array.from(this.currentPressedKeys).sort().join('');
+                    
+                    if (combo) {
+                        this.playSound(combo);
+                        this.recordingEngine.recordKeyPress(combo);
+                    }
+                }, 25);
+            }
+            
+            handleKeyUp(e) {
+                if (!this.isRecording) return;
+                if (!['0', '1', '2', '3'].includes(e.key)) return;
+                
+                this.currentPressedKeys.delete(e.key);
+                
+                if (this.currentPressedKeys.size === 0) {
+                    this.stopAllSounds();
+                    
+                    if (this.recordingEngine) {
+                        this.recordingEngine.recordKeyRelease();
+                    }
+                }
+            }
+
+            handleTouchStart(e) {
+                e.preventDefault();
+                if (!this.isRecording) return;
+
+                const button = e.currentTarget;
+                const key = button.dataset.key;
+                
+                button.classList.add('active');
+                this.activeTouches.add(key);
+
+                if (this.touchCombinationTimer) {
+                    clearTimeout(this.touchCombinationTimer);
+                }
+
+                this.touchCombinationTimer = setTimeout(() => {
+                    const combo = Array.from(this.activeTouches).sort().join('');
+                    
+                    if (combo) {
+                        this.playSound(combo);
+                        this.recordingEngine.recordKeyPress(combo);
+                    }
+                }, 25);
+            }
+
+            handleTouchEnd(e) {
+                e.preventDefault();
+                if (!this.isRecording) return;
+
+                const button = e.currentTarget;
+                const key = button.dataset.key;
+                
+                button.classList.remove('active');
+                this.activeTouches.delete(key);
+
+                if (this.activeTouches.size === 0) {
+                    this.stopAllSounds();
+                    
+                    if (this.recordingEngine) {
+                        this.recordingEngine.recordKeyRelease();
+                    }
+                }
+            }
+            
+            playSound(combo) {
+                const config = this.instrumentConfig[this.currentInstrument];
+                if (!config.sounds[combo]) {
+                    console.log(`⚠️ ${combo} nicht verfügbar`);
+                    return;
+                }
+                
+                const currentCombo = Array.from(this.activeSources.keys())[0];
+                if (currentCombo === combo) {
+                    return;
+                }
+                
+                this.stopAllSounds();
+                
+                const buffer = this.audioBuffers[this.currentInstrument][combo];
+                if (!buffer) return;
+                
+                const source = this.audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true;
+                
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.value = 0;
+                gainNode.gain.linearRampToValueAtTime(1, this.audioContext.currentTime + 0.01);
+                
+                source.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                source.start(0);
+                
+                this.activeSources.set(combo, { source, gainNode });
+                console.log(`🔊 ${config.name} - ${combo}`);
+            }
+            
+            stopAllSounds() {
+                this.activeSources.forEach((audioNode, combo) => {
+                    try {
+                        const { source, gainNode } = audioNode;
+                        gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.01);
+                        
+                        setTimeout(() => {
+                            try {
+                                source.stop();
+                                source.disconnect();
+                                gainNode.disconnect();
+                            } catch (e) {
+                            }
+                        }, 20);
+                    } catch (e) {
+                    }
+                });
+                this.activeSources.clear();
+            }
+            
+            toggleZahlzeit() {
+                this.notationSystem.toggleZahlzeit();
+                const text = this.notationSystem.showZahlzeit ? 'verbergen' : 'anzeigen';
+                this.elements.toggleCounts.textContent = `Zählzeiten ${text}`;
+            }
+
+            toggleEditorMode() {
+                this.editorMode = !this.editorMode;
+    
+                if (this.editorMode) {
+                    console.log('📝 Editor-Modus AKTIVIERT');
+                    document.body.classList.add('editor-mode');
+                    this.elements.editorToggle.classList.add('active');
+        
+                    if (this.isPlaying) {
+                        console.log('⏸️ Playback pausiert durch Editor-Aktivierung');
+                        this.pausePlayback();
+                    }
+        
+                    this.makeCellsEditable();
+                    this.notationSystem.renderPartitur(this.elements.partiturContent);
+                    this.makeCellsEditable();
+                    this.updateStatus('📝 Editor-Modus aktiv - Zellen sind editierbar');
+                } else {
+                    console.log('📝 Editor-Modus DEAKTIVIERT');
+                    
+                    this.notationSystem.normalizeTrackLengths();
+                    
+                    document.body.classList.remove('editor-mode');
+                    this.elements.editorToggle.classList.remove('active');
+        
+                    this.exitColumnInsertMode();
+                    this.exitColumnDeleteMode();
+                    this.makeCellsNonEditable();
+                    this.notationSystem.renderPartitur(this.elements.partiturContent);
+                    this.updateStatus('✅ Editor-Modus deaktiviert - Spuren normalisiert');
+                }
+            }
+
+            makeCellsEditable() {
+                const cells = document.querySelectorAll('.notation-table td[data-track][data-column]');
+                cells.forEach(cell => {
+                    cell.setAttribute('contenteditable', 'true');
+                });
+            }
+
+            makeCellsNonEditable() {
+                const cells = document.querySelectorAll('.notation-table td[data-track][data-column]');
+                cells.forEach(cell => {
+                    cell.removeAttribute('contenteditable');
+                });
+            }
+
+            startInsertColumnMode() {
+                if (!this.editorMode) return;
+                
+                if (this.columnInsertMode) {
+                    this.exitColumnInsertMode();
+                    this.updateStatus('📝 Editor-Modus aktiv');
+                    console.log('➕ Spalten-Einfügen-Modus DEAKTIVIERT');
+                    return;
+                }
+    
+                this.columnInsertMode = true;
+                this.columnDeleteMode = false;
+    
+                document.body.classList.add('column-insert-mode');
+                document.body.classList.remove('column-delete-mode');
+    
+                this.elements.insertColumnBtn.classList.add('active');
+                this.elements.deleteColumnBtn.classList.remove('active');
+                this.elements.insertColumnBtnMobile.classList.add('active');
+                this.elements.deleteColumnBtnMobile.classList.remove('active');
+    
+                this.updateStatus('➕ Klicke auf Spalte - neue Spalte wird DAVOR eingefügt');
+                console.log('➕ Spalten-Einfügen-Modus AKTIVIERT');
+            }
+
+            startDeleteColumnMode() {
+                if (!this.editorMode) return;
+                
+                if (this.columnDeleteMode) {
+                    if (this.markedColumns.size > 0) {
+                        this.deleteMarkedColumns();
+                    } else {
+                        this.exitColumnDeleteMode();
+                        this.updateStatus('📝 Editor-Modus aktiv');
+                        console.log('➖ Spalten-Löschen-Modus DEAKTIVIERT');
+                    }
+                    return;
+                }
+    
+                this.columnDeleteMode = true;
+                this.columnInsertMode = false;
+    
+                document.body.classList.add('column-delete-mode');
+                document.body.classList.remove('column-insert-mode');
+    
+                this.elements.deleteColumnBtn.classList.add('active');
+                this.elements.insertColumnBtn.classList.remove('active');
+                this.elements.deleteColumnBtnMobile.classList.add('active');
+                this.elements.insertColumnBtnMobile.classList.remove('active');
+                
+                const isMobile = window.innerWidth < 768;
+                if (isMobile) {
+                    this.updateStatus('➖ Tippe Spalten zum Markieren | [- Löschen] = Ausführen');
+                } else {
+                    this.updateStatus('➖ LINKS-Klick = Löschen | RECHTS-Klick = Mehrere markieren');
+                }
+                console.log('➖ Spalten-Löschen-Modus AKTIVIERT');
+            }
+
+            exitColumnInsertMode() {
+                this.columnInsertMode = false;
+                document.body.classList.remove('column-insert-mode');
+                this.elements.insertColumnBtn.classList.remove('active');
+                this.elements.insertColumnBtnMobile.classList.remove('active');
+            }
+
+            exitColumnDeleteMode() {
+                this.columnDeleteMode = false;
+                document.body.classList.remove('column-delete-mode');
+                this.elements.deleteColumnBtn.classList.remove('active');
+                this.elements.deleteColumnBtnMobile.classList.remove('active');
+                
+                document.querySelectorAll('.marked-for-deletion').forEach(el => {
+                    el.classList.remove('marked-for-deletion');
+                });
+                this.markedColumns.clear();
+            }
+
+            insertColumn(trackIndex, columnIndex) {
+                console.log(`➕ Füge leere Spalte an Position ${columnIndex} in Spur ${trackIndex} ein`);
+                const scrollPosY = window.scrollY;
+                
+                const trackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${trackIndex}"]`);
+                const scrollLeft = trackElement?.querySelector('.table-wrapper')?.scrollLeft || 0;
+                
+                this.notationSystem.insertColumn(trackIndex, columnIndex);
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                
+                if (this.editorMode) {
+                    this.makeCellsEditable();
+                }
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        window.scrollTo(0, scrollPosY);
+                        const newTrackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${trackIndex}"]`);
+                        const wrapper = newTrackElement?.querySelector('.table-wrapper');
+                        if (wrapper) wrapper.scrollLeft = scrollLeft;
+                        setTimeout(() => {
+                            window.scrollTo(0, scrollPosY);
+                            if (wrapper) wrapper.scrollLeft = scrollLeft;
+                        }, 10);
+                    });
+                });
+                
+                this.updateStatus(`✅ Leere Spalte eingefügt an Position ${columnIndex + 1}`);
+            }
+
+            deleteSingleColumn(trackIndex, columnIndex) {
+                if (this.notationSystem.tracks.length === 0) return;
+                if (trackIndex < 0 || trackIndex >= this.notationSystem.tracks.length) return;
+                
+                const track = this.notationSystem.tracks[trackIndex];
+                if (track.columns.length <= 1) {
+                    this.updateStatus('⚠️ Letzte Spalte kann nicht gelöscht werden');
+                    return;
+                }
+                
+                console.log(`➖ Lösche einzelne Spalte ${columnIndex} in Spur ${trackIndex}`);
+                const scrollPosY = window.scrollY;
+                
+                const trackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${trackIndex}"]`);
+                const scrollLeft = trackElement?.querySelector('.table-wrapper')?.scrollLeft || 0;
+                
+                if (document.activeElement && document.activeElement.hasAttribute('contenteditable')) {
+                    document.activeElement.blur();
+                }
+                
+                this.notationSystem.deleteColumn(trackIndex, columnIndex);
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                
+                if (this.editorMode) {
+                    this.makeCellsEditable();
+                }
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        window.scrollTo(0, scrollPosY);
+                        const newTrackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${trackIndex}"]`);
+                        const wrapper = newTrackElement?.querySelector('.table-wrapper');
+                        if (wrapper) wrapper.scrollLeft = scrollLeft;
+                        setTimeout(() => {
+                            window.scrollTo(0, scrollPosY);
+                            if (wrapper) wrapper.scrollLeft = scrollLeft;
+                        }, 10);
+                    });
+                });
+                
+                this.exitColumnDeleteMode();
+                this.updateStatus(`✅ Spalte ${columnIndex + 1} gelöscht`);
+            }
+
+            deleteMarkedColumns() {
+                if (this.markedColumns.size === 0) return;
+                if (this.notationSystem.tracks.length === 0) return;
+                
+                console.log(`➖ Lösche ${this.markedColumns.size} markierte Spalten`);
+                const scrollPosY = window.scrollY;
+                
+                const scrollLeftByTrack = new Map();
+                this.notationSystem.tracks.forEach((track, idx) => {
+                    const trackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${idx}"]`);
+                    const scrollLeft = trackElement?.querySelector('.table-wrapper')?.scrollLeft || 0;
+                    scrollLeftByTrack.set(idx, scrollLeft);
+                });
+                
+                if (document.activeElement && document.activeElement.hasAttribute('contenteditable')) {
+                    document.activeElement.blur();
+                }
+                
+                const byTrack = new Map();
+                for (const [key, {trackIndex, columnIndex}] of this.markedColumns) {
+                    if (!byTrack.has(trackIndex)) {
+                        byTrack.set(trackIndex, []);
+                    }
+                    byTrack.get(trackIndex).push(columnIndex);
+                }
+                
+                for (const [trackIndex, columns] of byTrack) {
+                    const track = this.notationSystem.tracks[trackIndex];
+                    if (!track) continue;
+                    
+                    if (columns.length >= track.columns.length) {
+                        console.log(`⚠️ Spur ${trackIndex}: Kann nicht alle Spalten löschen`);
+                        continue;
+                    }
+                    
+                    const sorted = columns.sort((a, b) => b - a);
+                    sorted.forEach(colIndex => {
+                        this.notationSystem.deleteColumn(trackIndex, colIndex);
+                    });
+                    console.log(`  → Spur ${trackIndex}: ${sorted.length} Spalten gelöscht`);
+                }
+                
+                this.markedColumns.clear();
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                
+                if (this.editorMode) {
+                    this.makeCellsEditable();
+                }
+                
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        window.scrollTo(0, scrollPosY);
+                        
+                        scrollLeftByTrack.forEach((scrollLeft, trackIdx) => {
+                            const trackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${trackIdx}"]`);
+                            const wrapper = trackElement?.querySelector('.table-wrapper');
+                            if (wrapper) wrapper.scrollLeft = scrollLeft;
+                        });
+                        
+                        setTimeout(() => {
+                            window.scrollTo(0, scrollPosY);
+                            scrollLeftByTrack.forEach((scrollLeft, trackIdx) => {
+                                const trackElement = this.elements.partiturContent.querySelector(`.track[data-track-index="${trackIdx}"]`);
+                                const wrapper = trackElement?.querySelector('.table-wrapper');
+                                if (wrapper) wrapper.scrollLeft = scrollLeft;
+                            });
+                        }, 10);
+                    });
+                });
+                
+                this.exitColumnDeleteMode();
+                this.updateStatus(`✅ ${sortedIndices.length} Spalten gelöscht`);
+            }
+
+            deleteColumn(columnIndex) {
+                this.deleteSingleColumn(columnIndex);
+            }
+
+            deleteTrack(trackIndex) {
+                const track = this.notationSystem.tracks[trackIndex];
+                if (!track) return;
+                console.log(`🗑️ Lösche Spur: ${track.instrumentName}`);
+                this.notationSystem.deleteTrack(trackIndex);
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                this.resetPlaybackPosition();
+                if (this.editorMode) {
+                    this.makeCellsEditable();
+                }
+                this.updateStatus(`✅ Spur "${track.instrumentName}" gelöscht`);
+                this.updatePlayButtonState();
+                this.updateExportButtons();
+            }
+
+            resetPlaybackPosition() {
+                if (this.playbackEngine) {
+                    this.playbackEngine.pausedState = null;
+                    this.playbackEngine = null;
+                    document.querySelectorAll('.playing').forEach(el => {
+                        el.classList.remove('playing');
+                    });
+                    console.log('🔄 Playback-Position zurückgesetzt');
+                }
+            }
+
+            showValidationError(message, allowedValues) {
+                this.elements.validationMessage.textContent = message;
+                if (allowedValues && allowedValues.length > 0) {
+                    this.elements.validationAllowedValues.innerHTML = '';
+                    allowedValues.forEach(val => {
+                        const li = document.createElement('li');
+                        li.textContent = val;
+                        this.elements.validationAllowedValues.appendChild(li);
+                    });
+                } else {
+                    this.elements.validationAllowedValues.innerHTML = '';
+                }
+                this.elements.validationModal.classList.add('show');
+                this.elements.modalBackdrop.classList.add('show');
+            }
+
+            closeValidationModal() {
+                this.elements.validationModal.classList.remove('show');
+                this.elements.modalBackdrop.classList.remove('show');
+            }
+            
+            toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                console.log(`🌓 Dark Mode: ${isDark ? 'AN' : 'AUS'}`);
+            }
+            
+            loadDarkMode() {
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const saved = localStorage.getItem('darkMode');
+                const shouldBeDark = saved !== null ? saved === 'true' : systemDark;
+                
+                if (shouldBeDark) {
+                    document.body.classList.add('dark-mode');
+                }
+            }
+            
+            updateInstrumentDisplay() {
+                const config = this.instrumentConfig[this.currentInstrument];
+                this.elements.currentInstrument.textContent = config.name;
+                this.elements.currentInstrument.className = `current-instrument ${this.currentInstrument}`;
+            }
+            
+            updateBPMDisplay() {
+                this.elements.currentBPM.textContent = this.bpm;
+            }
+
+            recalculateAllZahlzeiten(oldBPM, newBPM) {
+                console.log(`🔄 Neuberechnung aller Zählzeiten: ${oldBPM} BPM → ${newBPM} BPM`);
+                const secondsPerBeatNew = 60 / newBPM;
+                
+                this.notationSystem.tracks.forEach((track, trackIndex) => {
+                    track.columns.forEach((column, colIndex) => {
+                        if (column.beats !== undefined) {
+                            const newZahlzeit = column.beats * secondsPerBeatNew;
+                            console.log(`  Spur ${trackIndex}, Spalte ${colIndex}: ${column.zahlzeit.toFixed(3)}s → ${newZahlzeit.toFixed(3)}s`);
+                            column.zahlzeit = newZahlzeit;
+                        }
+                    });
+                });
+                
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                if (this.editorMode) {
+                    this.makeCellsEditable();
+                }
+                console.log('✅ Alle Zählzeiten neu berechnet');
+            }
+
+            startMetronom() {
+                if (this.metronomInterval) {
+                    this.stopMetronom();
+                }
+
+                console.log(`🎵 Starte Metronom: ${this.bpm} BPM, ${this.timeSignature} Takt`);
+                console.log('Verfügbare Metronom-Buffers:', Object.keys(this.audioBuffers.metronom));
+
+                this.metronomBeat = 0;
+                const beatDuration = (60 / this.bpm) * 1000;
+                
+                const beatsPerMeasure = parseInt(this.timeSignature.split('/')[0]);
+                
+                this.playMetronomSound('accent');
+                
+                this.metronomInterval = setInterval(() => {
+                    this.metronomBeat = (this.metronomBeat + 1) % beatsPerMeasure;
+                    
+                    if (this.metronomBeat === 0) {
+                        this.playMetronomSound('accent');
+                    } else {
+                        this.playMetronomSound('normal');
+                    }
+                }, beatDuration);
+                
+                console.log(`✅ Metronom läuft mit ${beatDuration.toFixed(0)}ms pro Schlag`);
+            }
+
+            stopMetronom() {
+                if (this.metronomInterval) {
+                    clearInterval(this.metronomInterval);
+                    this.metronomInterval = null;
+                    this.metronomBeat = 0;
+                    console.log('⏹️ Metronom gestoppt');
+                }
+            }
+
+            playMetronomSound(type) {
+                const buffer = this.audioBuffers.metronom[type];
+                if (!buffer) {
+                    console.error(`❌ Metronom Buffer nicht gefunden: ${type}`);
+                    console.log('Verfügbare Buffers:', Object.keys(this.audioBuffers.metronom));
+                    return;
+                }
+
+                const source = this.audioContext.createBufferSource();
+                source.buffer = buffer;
+                
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.value = 0.6;
+                
+                source.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                source.start(0);
+            }
+            
+            updateStatus(msg) {
+                this.elements.statusText.textContent = msg;
+            }
+
+            updateExportButtons() {
+                const hasTracks = this.notationSystem.tracks.length > 0;
+                const hasMultipleTracks = this.notationSystem.tracks.length > 1;
+                
+                this.elements.exportPartiturBtn.disabled = !hasTracks;
+                this.elements.exportAuswahlBtn.disabled = !hasMultipleTracks;
+            }
+
+            exportPartitur() {
+                if (this.notationSystem.tracks.length === 0) {
+                    this.updateStatus('⚠️ Keine Partitur zum Exportieren');
+                    return;
+                }
+
+                if (this.editorMode) {
+                    console.log('📥 Deaktiviere Editor-Modus für Export');
+                    this.toggleEditorMode();
+                }
+
+                const csv = this.notationSystem.exportToCSV();
+                const filename = this.notationSystem.tracks.length === 1
+                    ? `${this.notationSystem.tracks[0].instrumentName}_${this.getCurrentDateString()}.csv`
+                    : `partitur_${this.getCurrentDateString()}.csv`;
+                
+                this.downloadCSV(csv, filename);
+                this.updateStatus(`✅ Partitur exportiert: ${filename}`);
+            }
+
+            showExportModal() {
+                if (this.notationSystem.tracks.length < 2) {
+                    return;
+                }
+
+                if (this.editorMode) {
+                    console.log('📥 Deaktiviere Editor-Modus für Export');
+                    this.toggleEditorMode();
+                }
+
+                let html = '';
+                this.notationSystem.tracks.forEach((track, index) => {
+                    html += `
+                        <label class="track-checkbox">
+                            <input type="checkbox" data-track-index="${index}">
+                            <span class="${track.instrument}">${track.instrumentName}</span>
+                        </label>
+                    `;
+                });
+                
+                this.elements.exportTrackList.innerHTML = html;
+                this.elements.exportModal.classList.add('show');
+                this.elements.modalBackdrop.classList.add('show');
+            }
+
+            hideExportModal() {
+                this.elements.exportModal.classList.remove('show');
+                this.elements.modalBackdrop.classList.remove('show');
+            }
+
+            exportAuswahl() {
+                const checkboxes = this.elements.exportTrackList.querySelectorAll('input[type="checkbox"]:checked');
+                const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.trackIndex));
+
+                if (selectedIndices.length === 0) {
+                    this.updateStatus('⚠️ Keine Spuren ausgewählt');
+                    return;
+                }
+
+                const csv = this.notationSystem.exportToCSV(selectedIndices);
+                const filename = `partitur_auswahl_${this.getCurrentDateString()}.csv`;
+                
+                this.downloadCSV(csv, filename);
+                this.hideExportModal();
+                this.updateStatus(`✅ ${selectedIndices.length} Spur(en) exportiert: ${filename}`);
+            }
+
+            downloadCSV(csvContent, filename) {
+                const BOM = '\uFEFF';
+                const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(url);
+            }
+
+            getCurrentDateString() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            showImportWarning() {
+                this.elements.importWarningModal.classList.add('show');
+                this.elements.modalBackdrop.classList.add('show');
+            }
+
+            hideImportWarning() {
+                this.elements.importWarningModal.classList.remove('show');
+                this.elements.modalBackdrop.classList.remove('show');
+            }
+
+            showImportError(message) {
+                this.elements.importErrorMessage.textContent = message;
+                this.elements.importErrorModal.classList.add('show');
+                this.elements.modalBackdrop.classList.add('show');
+                this.updateStatus('❌ Import fehlgeschlagen');
+            }
+
+            hideImportError() {
+                this.elements.importErrorModal.classList.remove('show');
+                this.elements.modalBackdrop.classList.remove('show');
+            }
+
+            triggerFileSelect() {
+                this.hideImportWarning();
+                this.elements.csvFileInput.click();
+            }
+
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.name.endsWith('.csv')) {
+                    this.showImportError('Bitte wähle eine CSV-Datei');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const csvContent = e.target.result;
+                        this.importCSV(csvContent);
+                    } catch (error) {
+                        console.error('Import Fehler:', error);
+                        this.showImportError(error.message);
+                    }
+                };
+                reader.readAsText(file, 'UTF-8');
+                
+                event.target.value = '';
+            }
+
+            importCSV(csvContent) {
+                console.log('📤 Starte CSV Import...');
+                
+                const lines = csvContent.split('\n').filter(line => line.trim() !== '');
+                
+                if (lines.length < 5) {
+                    throw new Error('CSV zu kurz - mindestens 5 Zeilen erwartet');
+                }
+
+                const tracks = [];
+                let currentTrack = null;
+                let ebene1 = null;
+                let ebene2 = null;
+                let ebene3 = null;
+                let zahlzeit = null;
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.startsWith('Ebene 3')) {
+                        const values = line.split(';').slice(1);
+                        ebene3 = values;
+                    } else if (line.startsWith('Ebene 2')) {
+                        const values = line.split(';').slice(1);
+                        ebene2 = values;
+                    } else if (line.startsWith('Ebene 1')) {
+                        const values = line.split(';').slice(1);
+                        ebene1 = values;
+                    } else if (line.startsWith('Zählzeit') || line.startsWith('Zaehlzeit')) {
+                        const values = line.split(';').slice(1);
+                        zahlzeit = values;
+                        
+                        if (!ebene1 || !ebene2 || !ebene3) {
+                            throw new Error('CSV-Format ungültig: Fehlende Ebenen vor Zählzeit-Zeile');
+                        }
+                        
+                        if (currentTrack && ebene1 && ebene2 && ebene3 && zahlzeit) {
+                            const columns = this.parseColumns(ebene1, ebene2, ebene3, zahlzeit);
+                            currentTrack.columns = columns;
+                            tracks.push(currentTrack);
+                            
+                            ebene1 = ebene2 = ebene3 = zahlzeit = null;
+                            currentTrack = null;
+                        }
+                    } else if (line && !line.startsWith('Ebene') && !line.startsWith('Zählzeit') && !line.startsWith('Zaehlzeit')) {
+                        if (currentTrack && ebene1) {
+                            const columns = this.parseColumns(ebene1, ebene2, ebene3, zahlzeit);
+                            currentTrack.columns = columns;
+                            tracks.push(currentTrack);
+                            
+                            ebene1 = ebene2 = ebene3 = zahlzeit = null;
+                        }
+                        
+                        const instrumentName = line;
+                        const instrument = this.detectInstrument(instrumentName);
+                        
+                        currentTrack = {
+                            id: Date.now() + tracks.length,
+                            instrument: instrument,
+                            instrumentName: instrumentName,
+                            columns: [],
+                            volume: 0.8,
+                            active: true
+                        };
+                    }
+                }
+
+                if (currentTrack && ebene1 && ebene2 && ebene3 && zahlzeit) {
+                    const columns = this.parseColumns(ebene1, ebene2, ebene3, zahlzeit);
+                    currentTrack.columns = columns;
+                    tracks.push(currentTrack);
+                }
+
+                if (tracks.length === 0) {
+                    throw new Error('Keine gültigen Spuren gefunden');
+                }
+
+                console.log(`✅ ${tracks.length} Spur(en) geparst`);
+                
+                this.notationSystem.clear();
+                this.notationSystem.tracks = tracks;
+                
+                tracks.forEach(track => {
+                    const baseInstrument = track.instrument;
+                    if (!this.notationSystem.instrumentCounters[baseInstrument]) {
+                        this.notationSystem.instrumentCounters[baseInstrument] = 0;
+                    }
+                    this.notationSystem.instrumentCounters[baseInstrument]++;
+                });
+                
+                this.notationSystem.renderPartitur(this.elements.partiturContent);
+                
+                if (this.editorMode) {
+                    this.makeCellsEditable();
+                }
+                
+                this.resetPlaybackPosition();
+                this.updatePlayButtonState();
+                this.updateExportButtons();
+                
+                this.updateStatus(`✅ Import erfolgreich: ${tracks.length} Spur(en) geladen`);
+                console.log('✅ CSV Import abgeschlossen');
+            }
+
+            parseColumns(ebene1, ebene2, ebene3, zahlzeit) {
+                const maxLength = Math.max(ebene1.length, ebene2.length, ebene3.length, zahlzeit.length);
+                const columns = [];
+                const errors = [];
+
+                for (let i = 0; i < maxLength; i++) {
+                    const e1 = ebene1[i]?.trim() || '';
+                    const e2 = ebene2[i]?.trim() || '';
+                    const e3 = ebene3[i]?.trim() || '';
+                    const z = zahlzeit[i]?.trim() || '';
+
+                    if (e3 !== '') {
+                        const val = parseInt(e3);
+                        if (isNaN(val) || val !== 1) {
+                            errors.push(`Ebene 3, Spalte ${i + 1}: "${e3}"`);
+                        }
+                    }
+
+                    if (e2 !== '') {
+                        const val = parseInt(e2);
+                        if (isNaN(val) || ![1, 2].includes(val)) {
+                            errors.push(`Ebene 2, Spalte ${i + 1}: "${e2}"`);
+                        }
+                    }
+
+                    if (e1 !== '') {
+                        const val = parseInt(e1);
+                        if (isNaN(val) || ![0, 1, 2, 3, 4].includes(val)) {
+                            errors.push(`Ebene 1, Spalte ${i + 1}: "${e1}"`);
+                        }
+                    }
+
+                    if (z === '') {
+                        errors.push(`Zählzeit, Spalte ${i + 1}: leer`);
+                    } else {
+                        const zval = parseFloat(z);
+                        if (isNaN(zval) || zval < 0.125) {
+                            errors.push(`Zählzeit, Spalte ${i + 1}: "${z}"`);
+                        }
+                    }
+                }
+
+                if (errors.length > 0) {
+                    if (errors.length === 1) {
+                        throw new Error(`Ungültiger Wert gefunden:\n${errors[0]}`);
+                    } else {
+                        throw new Error(`Mehrere ungültige Werte gefunden (${errors.length} Fehler).\nBitte Datei vorher überprüfen/korrigieren.`);
+                    }
+                }
+
+                for (let i = 0; i < maxLength; i++) {
+                    const e1 = ebene1[i]?.trim() || '';
+                    const e2 = ebene2[i]?.trim() || '';
+                    const e3 = ebene3[i]?.trim() || '';
+                    const z = zahlzeit[i]?.trim() || '';
+                    const zval = parseFloat(z);
+
+                    const keys = [];
+                    if (e3 !== '') keys.push(parseInt(e3));
+                    if (e2 !== '') keys.push(parseInt(e2));
+                    if (e1 !== '') keys.push(parseInt(e1));
+
+                    const secondsPerBeat = 60 / this.bpm;
+                    const beats = zval / secondsPerBeat;
+
+                    columns.push({
+                        keys: keys.length > 0 ? keys.sort().join('') : 'pause',
+                        beats: beats,
+                        zahlzeit: zval,
+                        duration: 0
+                    });
+                }
+
+                return columns;
+            }
+
+            detectInstrument(name) {
+                const lowerName = name.toLowerCase();
+                if (lowerName.includes('bariton')) return 'bariton';
+                if (lowerName.includes('sopran')) return 'sopran';
+                if (lowerName.includes('akkord')) return 'akkord';
+                return 'bariton';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new MusikApp();
+            window.musikApp = app;
+        });
+    </script>
+
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="validation-modal" id="validationModal">
+        <h3>⚠️ Ungültige Eingabe</h3>
+        <p id="validationMessage"></p>
+        <ul id="validationAllowedValues"></ul>
+        <button id="validationOkBtn">OK</button>
+    </div>
+
+    <div class="validation-modal export-modal" id="exportModal">
+        <h3>📥 CSV Export - Spuren auswählen</h3>
+        <p>Wähle die Spuren aus, die exportiert werden sollen:</p>
+        <div class="track-checkbox-list" id="exportTrackList"></div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button id="exportCancelBtn" style="background: var(--btn-stop); flex: 1;">Abbrechen</button>
+            <button id="exportConfirmBtn" style="flex: 1;">Exportieren</button>
+        </div>
+    </div>
+
+    <div class="validation-modal" id="importWarningModal" style="border: 2px solid var(--btn-danger);">
+        <h3>⚠️ Partitur importieren</h3>
+        <p style="margin-bottom: 1rem; line-height: 1.6;">
+            <strong>Achtung:</strong> Die aktuelle Partitur wird ersetzt.<br>
+            Nicht gespeicherte Änderungen gehen verloren.
+        </p>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button id="importCancelBtn" style="background: var(--btn-stop); flex: 1;">Abbrechen</button>
+            <button id="importConfirmBtn" style="background: var(--btn-danger); flex: 1;">Jetzt importieren</button>
+        </div>
+    </div>
+
+    <div class="validation-modal" id="importErrorModal" style="border: 2px solid var(--btn-danger);">
+        <h3>❌ Import fehlgeschlagen</h3>
+        <p id="importErrorMessage" style="margin-bottom: 1rem; line-height: 1.6; white-space: pre-wrap;"></p>
+        <button id="importErrorOkBtn" style="width: 100%;">OK</button>
+    </div>
+
+    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+
+    <div class="orientation-overlay">
+        <div class="orientation-icon">📱↻</div>
+        <div class="orientation-text">
+            Bitte drehe dein Gerät<br>um in die KlangKiste zu steigen
+        </div>
+    </div>
+
+    <div class="touch-buttons">
+        <div class="touch-button-padding"></div>
+        <button class="touch-button" data-key="0">0</button>
+        <button class="touch-button" data-key="3">3</button>
+        <button class="touch-button" data-key="2">2</button>
+        <button class="touch-button" data-key="1">1</button>
+        <div class="touch-button-padding"></div>
+    </div>
+</body>
+</html>
