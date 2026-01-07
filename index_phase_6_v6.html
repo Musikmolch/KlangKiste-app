@@ -1381,8 +1381,7 @@
             
             mapKeysToNotation(physicalKeys) {
                 if (physicalKeys === 'pause') return 'pause';
-                const keyMap = {'0': '0', '3': '1', '2': '2', '1': '3'};
-                return physicalKeys.split('').map(k => keyMap[k] || k).sort().join('');
+                return physicalKeys.split('').sort().join('');
             }
 
             recordKeyRelease() {
@@ -2083,15 +2082,13 @@
 
                 if (column.keys === 'pause') return;
 
-                const notationKeys = column.keys;
-                const physicalKeys = this.mapNotationToPhysicalKeys(notationKeys);
-                const combo = physicalKeys;
+                const combo = column.keys;
                 
                 if (!combo) return;
 
                 const config = this.instrumentConfig[instrument];
                 if (!config || !config.sounds[combo]) {
-                    console.log(`  ⚠️ ${track.instrumentName}: Sound ${combo} nicht gefunden (Notation: ${notationKeys})`);
+                    console.log(`  ⚠️ ${track.instrumentName}: Sound ${combo} nicht gefunden`);
                     return;
                 }
 
@@ -2121,13 +2118,7 @@
                 
                 const duration = column.zahlzeit;
                 const volumePercent = Math.round(trackVolume * 100);
-                console.log(`  🔊 ${track.instrumentName} Pos ${columnIndex + 1}: Notation=${notationKeys} → Physisch=${combo} (${column.zahlzeit.toFixed(3)}s) Vol:${volumePercent}%`);
-            }
-
-            mapNotationToPhysicalKeys(notationKeys) {
-                if (notationKeys === 'pause') return 'pause';
-                const reverseMap = {'0': '0', '1': '3', '2': '2', '3': '1'};
-                return notationKeys.split('').map(k => reverseMap[k] || k).sort().join('');
+                console.log(`  🔊 ${track.instrumentName} Pos ${columnIndex + 1}: Keys=${combo} (${column.zahlzeit.toFixed(3)}s) Vol:${volumePercent}%`);
             }
             
             stopTrackSounds(trackIndex) {
@@ -2329,12 +2320,12 @@
                         name: 'Bariton',
                         sounds: {
                             '0': 'sounds/bariton_g3.mp3',
-                            '3': 'sounds/bariton_a3.mp3',
+                            '1': 'sounds/bariton_a3.mp3',
                             '2': 'sounds/bariton_h3.mp3',
-                            '23': 'sounds/bariton_c4.mp3',
-                            '1': 'sounds/bariton_d4.mp3',
+                            '12': 'sounds/bariton_c4.mp3',
+                            '3': 'sounds/bariton_d4.mp3',
                             '13': 'sounds/bariton_e4.mp3',
-                            '12': 'sounds/bariton_f4.mp3',
+                            '23': 'sounds/bariton_f4.mp3',
                             '123': 'sounds/bariton_g4.mp3'
                         }
                     },
@@ -2342,12 +2333,12 @@
                         name: 'Sopran',
                         sounds: {
                             '0': 'sounds/sopran_g4.mp3',
-                            '3': 'sounds/sopran_a4.mp3',
+                            '1': 'sounds/sopran_a4.mp3',
                             '2': 'sounds/sopran_h4.mp3',
-                            '23': 'sounds/sopran_c5.mp3',
-                            '1': 'sounds/sopran_d5.mp3',
+                            '12': 'sounds/sopran_c5.mp3',
+                            '3': 'sounds/sopran_d5.mp3',
                             '13': 'sounds/sopran_e5.mp3',
-                            '12': 'sounds/sopran_f5.mp3',
+                            '23': 'sounds/sopran_f5.mp3',
                             '123': 'sounds/sopran_g5.mp3'
                         }
                     },
@@ -2355,10 +2346,10 @@
                         name: 'Akkord',
                         sounds: {
                             '0': 'sounds/akkord_c_dur.mp3',
-                            '3': 'sounds/akkord_g_dur.mp3',
+                            '1': 'sounds/akkord_g_dur.mp3',
                             '2': 'sounds/akkord_f_dur.mp3',
-                            '23': 'sounds/akkord_d_dur.mp3',
-                            '1': 'sounds/akkord_a_moll.mp3'
+                            '12': 'sounds/akkord_d_dur.mp3',
+                            '3': 'sounds/akkord_a_moll.mp3'
                         }
                     },
                     metronom: {
