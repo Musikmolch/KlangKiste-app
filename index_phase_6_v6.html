@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -69,33 +69,25 @@
 
         .header-content {
             padding: 0 2rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            grid-template-rows: auto auto;
-            gap: 0.5rem;
-            align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            width: 100%;
         }
 
-        .app-logo {
-            grid-column: 1;
-            grid-row: 1 / 3;
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .logo-klang,
+        .logo-kiste {
             font-family: 'Righteous', cursive;
             font-size: 2.8rem;
             line-height: 1.2;
-            color: var(--accent);
-            display: flex;
-            flex-direction: column;
-            margin-right: 2.5rem;
-        }
-
-        .app-logo .logo-klang {
-            background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .app-logo .logo-kiste {
             background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -103,14 +95,11 @@
         }
 
         .header-controls {
-            grid-column: 2;
-            grid-row: 2;
             display: flex;
             align-items: center;
-            gap: 2rem;
-            flex-wrap: nowrap;
-            padding-left: 2.5rem;
-            padding-right: 1rem;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         .recording-group {
@@ -128,9 +117,8 @@
         }
 
         .theme-toggle-wrapper {
-            grid-column: 3;
-            grid-row: 1;
-            align-self: start;
+            display: flex;
+            align-items: center;
         }
 
         .instrument-selector {
@@ -972,7 +960,7 @@
             display: none;
         }
 
-        @media (max-height: 900px) and (orientation: portrait) {
+        @media (max-width: 900px) and (orientation: portrait) {
             .orientation-overlay {
                 display: flex;
                 position: fixed;
@@ -1013,7 +1001,7 @@
             }
         }
 
-        @media (max-height: 900px) and (orientation: landscape) {
+        @media (max-width: 1200px) and (orientation: landscape) {
             .touch-buttons {
                 display: flex;
                 position: fixed;
@@ -1072,23 +1060,20 @@
             }
         
 
-@media (max-height: 900px) and (orientation: landscape) {
+@media (max-width: 1200px) and (orientation: landscape) {
     .app-header {
-        padding: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
     }
 
     .header-content {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 0.5rem !important;
-        align-items: center !important;
-        width: 100% !important;
-        grid-template-columns: unset !important;
-        grid-template-rows: unset !important;
+        padding: 0 1rem !important;
+        gap: 0.75rem !important;
     }
     
-    .app-logo {
-        display: none !important;
+    .logo-klang,
+    .logo-kiste {
+        font-size: 3.5rem !important;
+        line-height: 1 !important;
     }
     
     .instrument-selector {
@@ -1100,70 +1085,69 @@
     }
     
     .instrument-dropdown {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        min-height: 44px;
     }
     
-    .recording-controls,
-    .playback-controls {
+    .recording-group,
+    .playback-group {
         display: flex;
         gap: 0.5rem;
-        flex: 0 0 auto;
     }
     
     .btn {
-        padding: 0.4rem 0.8rem !important;
-        font-size: 0.75rem !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.85rem !important;
+        min-height: 44px !important;
     }
     
     .btn span {
-        font-size: 0.85rem;
-    }
-    
-    .theme-toggle {
-        flex: 0 0 auto;
-        margin-left: auto;
+        font-size: 1rem;
     }
     
     .btn-theme {
-        padding: 0.4rem !important;
-        font-size: 1rem !important;
+        padding: 0.6rem !important;
+        font-size: 1.1rem !important;
+        min-height: 44px !important;
+        min-width: 44px !important;
     }
     
     .metronom-settings {
-        flex: 1 1 100%;
         display: flex;
         gap: 0.5rem;
-        padding: 0.4rem;
-        font-size: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
     }
     
     .metronom-settings label {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
     
     .metronom-settings input,
     .metronom-settings select {
-        padding: 0.3rem 0.4rem;
-        font-size: 0.75rem;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.85rem;
+        min-height: 40px;
     }
     
     .toggle-switch {
-        width: 36px;
-        height: 20px;
+        width: 40px;
+        height: 22px;
     }
     
     .toggle-switch::after {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
     }
     
     .metronom-toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
-        transform: translateX(16px);
+        transform: translateX(18px);
     }
     
     .metronom-toggle-label span:last-child {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
+    }
     
 
                 padding: 0.15rem;
@@ -1219,12 +1203,19 @@
 <body>
     <header class="app-header">
         <div class="header-content">
-            <div class="app-logo">
+            <div class="header-top-row">
                 <span class="logo-klang">Klang</span>
-                <span class="logo-kiste">Kiste</span>
+
+                <div class="theme-toggle-wrapper">
+                    <button id="darkModeToggle" class="btn btn-theme" title="Dark Mode">
+                        🌓
+                    </button>
+                </div>
             </div>
 
             <div class="header-controls">
+                <span class="logo-kiste">Kiste</span>
+
                 <div class="instrument-selector">
                     <select id="instrument" class="instrument-dropdown">
                         <option value="bariton">Bariton</option>
@@ -1269,12 +1260,6 @@
                         <span>⏹</span> Stop
                     </button>
                 </div>
-            </div>
-
-            <div class="theme-toggle-wrapper">
-                <button id="darkModeToggle" class="btn btn-theme" title="Dark Mode">
-                    🌓
-                </button>
             </div>
         </div>
 
