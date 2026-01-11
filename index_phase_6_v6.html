@@ -303,11 +303,49 @@
             display: none;
             gap: 0.5rem;
             width: 100%;
-            margin-top: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 2px solid var(--accent);
+        }
+
+        body.editor-mode .mobile-editor-buttons {
+            display: none;
+        }
+
+        .mobile-editor-title {
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-editor-hint {
+            width: 100%;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 0.75rem;
         }
 
         @media (max-width: 767px) {
-            .mobile-editor-buttons {
+            body.editor-mode .mobile-editor-buttons {
+                display: flex;
+                flex-wrap: wrap;
+            }
+    
+            .editor-panel {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 1200px) and (orientation: landscape) {
+            body.editor-mode .mobile-editor-buttons {
                 display: flex;
                 flex-wrap: wrap;
             }
@@ -1148,6 +1186,25 @@
     .metronom-toggle-label span:last-child {
         font-size: 0.85rem;
     }
+
+    .mobile-editor-buttons {
+        padding: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .mobile-editor-title {
+        font-size: 0.85rem;
+    }
+
+    .mobile-editor-hint {
+        font-size: 0.7rem;
+    }
+
+    .btn-small {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+    }
     
 
                 padding: 0.15rem;
@@ -1302,6 +1359,8 @@
             </div>
     
             <div class="mobile-editor-buttons">
+                <div class="mobile-editor-title">📝 EDITOR-MODUS AKTIV</div>
+                <div class="mobile-editor-hint">Klicke auf Zellen zum Bearbeiten | Lang auf Spur-Name für Optionen</div>
                 <button id="insertColumnBtnMobile" class="btn btn-small editor-btn-insert">+ Spalte einfügen</button>
                 <button id="deleteColumnBtnMobile" class="btn btn-small editor-btn-delete">- Spalte löschen</button>
             </div>
