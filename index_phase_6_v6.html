@@ -7,6 +7,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>KlangKiste - Musik Notations-App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="theme-color" content="#7c3aed">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
@@ -1397,10 +1402,12 @@
                 this.onLiveUpdate = null; // Callback für Live-Updates
             }
 
-            start() {
+            start(instrument, keyToNotation) {
                 this.events = [];
                 this.startTime = performance.now();
                 this.lastEventTime = this.startTime;
+                this.instrument = instrument;
+                this.keyToNotation = keyToNotation;
                 console.log('⏺️ Recording gestartet');
             }
 
@@ -1408,15 +1415,20 @@
                 const now = performance.now();
                 const duration = this.lastEventTime ? now - this.lastEventTime : 0;
                 
+                // Mappe physische Taste zu Notation
+                const notation = this.keyToNotation && this.keyToNotation[keys] 
+                    ? this.keyToNotation[keys] 
+                    : keys;
+                
                 this.events.push({
                     type: 'keypress',
-                    keys: keys,
+                    keys: notation,  // Speichere die NOTATION, nicht die physische Taste
                     timestamp: now,
                     duration: duration
                 });
 
                 this.lastEventTime = now;
-                console.log(`📝 Key: ${keys}, Zeit: ${duration.toFixed(0)}ms`);
+                console.log(`📝 Physisch: ${keys} → Notation: ${notation}, Zeit: ${duration.toFixed(0)}ms`);
                 
                 if (this.onLiveUpdate) {
                     this.onLiveUpdate(this.generateNotation());
@@ -2016,13 +2028,14 @@
         }
 
         class PlaybackEngine {
-            constructor(tracks, bpm, audioContext, instrumentConfig, audioBuffers, notationSystem) {
+            constructor(tracks, bpm, audioContext, instrumentConfig, audioBuffers, notationSystem, app) {
                 this.tracks = tracks;
                 this.bpm = bpm;
                 this.audioContext = audioContext;
                 this.instrumentConfig = instrumentConfig;
                 this.audioBuffers = audioBuffers;
                 this.notationSystem = notationSystem;
+                this.app = app;
                 
                 this.isPlaying = false;
                 this.activeSources = new Map(); // Pro Spur: Map von Sources
@@ -2126,7 +2139,11 @@
 
                 if (column.keys === 'pause') return;
 
-                const combo = column.keys;
+                // column.keys enthält die NOTATION (z.B. "12")
+                // Wir brauchen die physische Taste für den Sound (z.B. "23")
+                const notation = column.keys;
+                const physicalKey = this.app.getNotationToKey(instrument, notation);
+                const combo = physicalKey;
                 
                 if (!combo) return;
 
@@ -2405,7 +2422,76 @@
                     }
                 };
                 
-                this.init();
+                
+                // Mapping: Physische Tasten → Notation in Partitur
+                // Taste 3 → wird als "1" notiert
+                // Taste 1 → wird als "3" notiert
+                // Taste 2 → wird als "2" notiert
+                // Taste 0 → wird als "0" notiert
+                this.keyToNotation = {
+                    'bariton': {
+                        '0': '0',      // Taste 0 → Notation 0
+                        '3': '1',      // Taste 3 → Notation 1
+                        '2': '2',      // Taste 2 → Notation 2
+                        '23': '12',    // Taste 2+3 → Notation 12
+                        '1': '3',      // Taste 1 → Notation 3
+                        '13': '13',    // Taste 1+3 → Notation 13
+                        '12': '23',    // Taste 1+2 → Notation 23
+                        '123': '123'   // Taste 1+2+3 → Notation 123
+                    },
+                    'sopran': {
+                        '0': '0',
+                        '3': '1',
+                        '2': '2',
+                        '23': '12',
+                        '1': '3',
+                        '13': '13',
+                        '12': '23',
+                        '123': '123'
+                    },
+                    'akkord': {
+                        '0': '0',
+                        '3': '1',
+                        '2': '2',
+                        '23': '12',
+                        '1': '3'
+                    }
+                };
+
+                // Umgekehrtes Mapping: Notation → Physische Tasten (für Playback)
+                // Notation "1" → Taste 3 drücken (Sound A)
+                // Notation "3" → Taste 1 drücken (Sound D)
+                this.notationToKey = {
+                    'bariton': {
+                        '0': '0',
+                        '1': '3',      // Notation 1 → Taste 3 (Sound A)
+                        '2': '2',
+                        '12': '23',    // Notation 12 → Taste 2+3 (Sound C)
+                        '3': '1',      // Notation 3 → Taste 1 (Sound D)
+                        '13': '13',
+                        '23': '12',    // Notation 23 → Taste 1+2 (Sound F)
+                        '123': '123'
+                    },
+                    'sopran': {
+                        '0': '0',
+                        '1': '3',
+                        '2': '2',
+                        '12': '23',
+                        '3': '1',
+                        '13': '13',
+                        '23': '12',
+                        '123': '123'
+                    },
+                    'akkord': {
+                        '0': '0',
+                        '1': '3',
+                        '2': '2',
+                        '12': '23',
+                        '3': '1'
+                    }
+                };
+                
+this.init();
             }
             
             async init() {
@@ -2597,6 +2683,12 @@
                 });
             }
             
+
+            getNotationToKey(instrument, notation) {
+                if (notation === 'pause') return 'pause';
+                return this.notationToKey[instrument][notation] || notation;
+            }
+
             startRecording() {
                 if (this.editorMode) {
                     console.log('📝 Editor-Modus wird für Aufnahme deaktiviert');
@@ -3004,26 +3096,6 @@
                 this.elements.playButton.disabled = !hasContent || this.isRecording;
             }
             
-
-            mapPhysicalToNotation(keys) {
-                // Mappe physische Tasten zu Notation für Partitur
-                // Taste 3 → Notation "1"
-                // Taste 1 → Notation "3"
-                // Taste 2 → Notation "2" (bleibt)
-                // Taste 0 → Notation "0" (bleibt)
-                
-                if (keys === 'pause') return 'pause';
-                if (keys === '0') return '0';
-                if (keys === '2') return '2';
-                
-                // Tausche 1 und 3
-                let result = keys
-                    .replace(/1/g, 'X')  // 1 → X (temp)
-                    .replace(/3/g, '1')  // 3 → 1
-                    .replace(/X/g, '3'); // X → 3
-                
-                return result.split('').sort().join('');
-            }
 
             handleKeyDown(e) {
                 if (!this.isRecording || e.repeat) return;
