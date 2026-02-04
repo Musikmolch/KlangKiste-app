@@ -2131,7 +2131,18 @@
 
                 if (column.keys === 'pause') return;
 
-                const combo = column.keys;
+                // Mappe Notation zurück zu physischen Tasten für Sound
+                // Notation 1 → Taste 3, Notation 3 → Taste 1
+                let physicalKeys = column.keys;
+                if (column.keys.includes('1') || column.keys.includes('3')) {
+                    physicalKeys = column.keys
+                        .replace(/1/g, 'X')
+                        .replace(/3/g, '1')
+                        .replace(/X/g, '3');
+                    physicalKeys = physicalKeys.split('').sort().join('');
+                }
+                
+                const combo = physicalKeys;
                 
                 if (!combo) return;
 
@@ -3037,7 +3048,18 @@
                     
                     if (combo) {
                         this.playSound(combo);
-                        this.recordingEngine.recordKeyPress(combo);
+                        
+                        // Mappe physische Tasten zu Notation: 1↔3
+                        let notation = combo;
+                        if (combo.includes('1') || combo.includes('3')) {
+                            notation = combo
+                                .replace(/1/g, 'X')
+                                .replace(/3/g, '1')
+                                .replace(/X/g, '3');
+                            notation = notation.split('').sort().join('');
+                        }
+                        
+                        this.recordingEngine.recordKeyPress(notation);
                     }
                 }, 25);
             }
@@ -3076,7 +3098,18 @@
                     
                     if (combo) {
                         this.playSound(combo);
-                        this.recordingEngine.recordKeyPress(combo);
+                        
+                        // Mappe physische Tasten zu Notation: 1↔3
+                        let notation = combo;
+                        if (combo.includes('1') || combo.includes('3')) {
+                            notation = combo
+                                .replace(/1/g, 'X')
+                                .replace(/3/g, '1')
+                                .replace(/X/g, '3');
+                            notation = notation.split('').sort().join('');
+                        }
+                        
+                        this.recordingEngine.recordKeyPress(notation);
                     }
                 }, 25);
             }
