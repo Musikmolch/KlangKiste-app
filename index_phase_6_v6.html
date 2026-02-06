@@ -997,6 +997,47 @@
 
         .touch-buttons {
             display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            z-index: 40;
+        }
+
+        @media (max-width: 767px), (max-width: 1200px) and (orientation: landscape) {
+            .touch-buttons {
+                display: flex;
+            }
+        }
+
+        .touch-button {
+            flex: 1;
+            max-width: 80px;
+            height: 80px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--bg-secondary);
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: none;
+            user-select: none;
+        }
+
+        .touch-button:active,
+        .touch-button.active {
+            background: var(--accent);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .touch-button-padding {
+            flex: 0.5;
         }
 
         .orientation-overlay {
@@ -2380,12 +2421,12 @@
                         name: 'Bariton',
                         sounds: {
                             '0': 'sounds/bariton_g3.mp3',
-                            '3': 'sounds/bariton_a3.mp3',
+                            '1': 'sounds/bariton_a3.mp3',  /* IST */
                             '2': 'sounds/bariton_h3.mp3',
-                            '23': 'sounds/bariton_c4.mp3',
-                            '1': 'sounds/bariton_d4.mp3',
+                            '12': 'sounds/bariton_c4.mp3',  /* IST */
+                            '3': 'sounds/bariton_d4.mp3',  /* IST */
                             '13': 'sounds/bariton_e4.mp3',
-                            '12': 'sounds/bariton_f4.mp3',
+                            '23': 'sounds/bariton_f4.mp3',  /* IST */
                             '123': 'sounds/bariton_g4.mp3'
                         }
                     },
@@ -2393,12 +2434,12 @@
                         name: 'Sopran',
                         sounds: {
                             '0': 'sounds/sopran_g4.mp3',
-                            '3': 'sounds/sopran_a4.mp3',
+                            '1': 'sounds/sopran_a4.mp3',  /* IST */
                             '2': 'sounds/sopran_h4.mp3',
-                            '23': 'sounds/sopran_c5.mp3',
-                            '1': 'sounds/sopran_d5.mp3',
+                            '12': 'sounds/sopran_c5.mp3',  /* IST */
+                            '3': 'sounds/sopran_d5.mp3',  /* IST */
                             '13': 'sounds/sopran_e5.mp3',
-                            '12': 'sounds/sopran_f5.mp3',
+                            '23': 'sounds/sopran_f5.mp3',  /* IST */
                             '123': 'sounds/sopran_g5.mp3'
                         }
                     },
@@ -2406,10 +2447,10 @@
                         name: 'Akkord',
                         sounds: {
                             '0': 'sounds/akkord_c_dur.mp3',
-                            '3': 'sounds/akkord_g_dur.mp3',
+                            '1': 'sounds/akkord_g_dur.mp3',  /* IST */
                             '2': 'sounds/akkord_f_dur.mp3',
-                            '23': 'sounds/akkord_d_dur.mp3',
-                            '1': 'sounds/akkord_a_moll.mp3'
+                            '12': 'sounds/akkord_d_dur.mp3',  /* IST */
+                            '3': 'sounds/akkord_a_moll.mp3'  /* IST */
                         }
                     },
                     metronom: {
@@ -3098,18 +3139,7 @@
                     
                     if (combo) {
                         this.playSound(combo);
-                        
-                        // Mappe physische Tasten zu Notation: 1↔3
-                        let notation = combo;
-                        if (combo.includes('1') || combo.includes('3')) {
-                            notation = combo
-                                .replace(/1/g, 'X')
-                                .replace(/3/g, '1')
-                                .replace(/X/g, '3');
-                            notation = notation.split('').sort().join('');
-                        }
-                        
-                        this.recordingEngine.recordKeyPress(notation);
+                        this.recordingEngine.recordKeyPress(combo);
                     }
                 }, 25);
             }
