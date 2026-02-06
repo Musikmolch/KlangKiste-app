@@ -2421,12 +2421,12 @@
                         name: 'Bariton',
                         sounds: {
                             '0': 'sounds/bariton_g3.mp3',
-                            '1': 'sounds/bariton_a3.mp3',  /* IST */
+                            '3': 'sounds/bariton_a3.mp3',  /* DESKTOP */
                             '2': 'sounds/bariton_h3.mp3',
-                            '12': 'sounds/bariton_c4.mp3',  /* IST */
-                            '3': 'sounds/bariton_d4.mp3',  /* IST */
+                            '23': 'sounds/bariton_c4.mp3',  /* DESKTOP */
+                            '1': 'sounds/bariton_d4.mp3',  /* DESKTOP */
                             '13': 'sounds/bariton_e4.mp3',
-                            '23': 'sounds/bariton_f4.mp3',  /* IST */
+                            '12': 'sounds/bariton_f4.mp3',  /* DESKTOP */
                             '123': 'sounds/bariton_g4.mp3'
                         }
                     },
@@ -2434,12 +2434,12 @@
                         name: 'Sopran',
                         sounds: {
                             '0': 'sounds/sopran_g4.mp3',
-                            '1': 'sounds/sopran_a4.mp3',  /* IST */
+                            '3': 'sounds/sopran_a4.mp3',  /* DESKTOP */
                             '2': 'sounds/sopran_h4.mp3',
-                            '12': 'sounds/sopran_c5.mp3',  /* IST */
-                            '3': 'sounds/sopran_d5.mp3',  /* IST */
+                            '23': 'sounds/sopran_c5.mp3',  /* DESKTOP */
+                            '1': 'sounds/sopran_d5.mp3',  /* DESKTOP */
                             '13': 'sounds/sopran_e5.mp3',
-                            '23': 'sounds/sopran_f5.mp3',  /* IST */
+                            '12': 'sounds/sopran_f5.mp3',  /* DESKTOP */
                             '123': 'sounds/sopran_g5.mp3'
                         }
                     },
@@ -2447,10 +2447,10 @@
                         name: 'Akkord',
                         sounds: {
                             '0': 'sounds/akkord_c_dur.mp3',
-                            '1': 'sounds/akkord_g_dur.mp3',  /* IST */
+                            '3': 'sounds/akkord_g_dur.mp3',  /* DESKTOP */
                             '2': 'sounds/akkord_f_dur.mp3',
-                            '12': 'sounds/akkord_d_dur.mp3',  /* IST */
-                            '3': 'sounds/akkord_a_moll.mp3'  /* IST */
+                            '23': 'sounds/akkord_d_dur.mp3',  /* DESKTOP */
+                            '1': 'sounds/akkord_a_moll.mp3'  /* DESKTOP */
                         }
                     },
                     metronom: {
@@ -3135,11 +3135,21 @@
                 }
 
                 this.touchCombinationTimer = setTimeout(() => {
-                    const combo = Array.from(this.activeTouches).sort().join('');
+                    const mobileCombo = Array.from(this.activeTouches).sort().join('');
                     
-                    if (combo) {
-                        this.playSound(combo);
-                        this.recordingEngine.recordKeyPress(combo);
+                    if (mobileCombo) {
+                        // MOBILE: Mappe Button zu Desktop-Taste für playSound (1↔3)
+                        let desktopKey = mobileCombo;
+                        if (mobileCombo.includes('1') || mobileCombo.includes('3')) {
+                            desktopKey = mobileCombo
+                                .replace(/1/g, 'X')
+                                .replace(/3/g, '1')
+                                .replace(/X/g, '3');
+                            desktopKey = desktopKey.split('').sort().join('');
+                        }
+                        
+                        this.playSound(desktopKey);  // Spiele mit Desktop-Taste
+                        this.recordingEngine.recordKeyPress(mobileCombo);  // Schreibe Mobile-Button
                     }
                 }, 25);
             }
